@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 /**
  * Author: darkf0xTV 
  * Description: Script that allows you to control a cube and add random ones.
@@ -16,6 +16,7 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+const controls = new OrbitControls( camera, renderer.domElement );
 // Create a cube
 var cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
 var cubeMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
@@ -128,8 +129,8 @@ var render = function() {
 
     //cube.material.color = `(${(cube.position.x )},${cube.position.y},${cube.rotation.z})`;
     cube.material.color = new THREE.Color(cube.position.x , cube.position.y, cube.rotation.y);
-    console.log(cube.material.color);
-
+    //console.log(cube.material.color);
+    controls.update();
     renderer.render(scene, camera);
     frameTick = (frameTick + 1)%60;
 };

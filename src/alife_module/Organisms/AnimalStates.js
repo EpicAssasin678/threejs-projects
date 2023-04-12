@@ -1,0 +1,35 @@
+export const HUNGER_STATES = {
+    STARVING:'STARVING', 
+    HUNGRY:'HUNGRY',
+    SATIATED:'SATIATED', 
+    FULL:'FULL',
+    OVERFED:'OVERFED'
+};
+
+export const MOVEMENT_STATES = {
+    IDLE: 'IDLE',
+    NORMAL: 'NORMAL',
+    RUNNING: 'RUNNING'
+}   
+
+export const ACTION_STATES = {
+    EATING: 'EATING',
+    WANDERING: 'WANDERING', 
+    SLEEPING: 'SLEEPING',
+    REPRODUCTING: 'REPRODUCTING'
+}
+
+export const STATES = [
+    HUNGER_STATES,
+    MOVEMENT_STATES,
+    ACTION_STATES
+]
+
+export default ANIMAL_STATES => { 
+    return {
+    ACTION_STATES,
+    HUNGER_STATES,
+    MOVEMENT_STATES
+    }
+}
+

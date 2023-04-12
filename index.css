@@ -1,0 +1,8 @@
+.stat-block {
+    display: flex;
+    position: absolute;
+    
+    max-width: min-content;
+    pointer-events: none;
+    z-index: 1;
+}
