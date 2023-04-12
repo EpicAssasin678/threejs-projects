@@ -17,7 +17,7 @@
   "description": "My webpack project",
   "name": "my-webpack-project",
   "scripts": {
-    "build": "webpack --mode=production --node-env=production",
+    "build": "npm install && npm install webpack && webpack --mode=production --node-env=production",
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",

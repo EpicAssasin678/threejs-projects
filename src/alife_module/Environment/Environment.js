@@ -82,56 +82,41 @@ class Environment {
      * Note: carryingCapacity determines the maximum amount of energy that can be stored in the environment 
      */
     initializeFoodSources (foodSourceMap) {
+        console.log(`[ENVIRONMENT] Initializing food sources...`);
         console.log(foodSourceMap);
         let energyAdded = 0;
-        //check that the food sources don't exceed the carrying capacity of the environment
-        while (energyAdded < this.carryingCapacity) {
-            foodSourceMap.forEach(element => {
-                //add food source to map
-                let foodSource = new FoodSource(element.totalEnergy, element.currentEnergy, element.decayRate);
-                foodSource.x = element.x;
-                foodSource.y = element.y;
-                
-                //this.map[element.x][element.y] = foodSource; <-- we aren't going to assign anything in this map to an object, possibly do a soil simulation eventually
-                energyAdded += foodSource.getTotalEnergy();
-                console.log(foodSource);
-                //add to map
-                this.addToEnvironment(foodSource);
-            });            
-            for (const key in foodSourceMap) {
-                console.log(key, foodSourceMap[key]);
-                let foodSource = new FoodSource(foodSourceMap[key].totalEnergy, foodSourceMap[key].currentEnergy, foodSourceMap[key].decayRate);
-                foodSource.setCoords(key[0], key[1]);
-                if (energyAdded < this.carryingCapacity) {
-                    energyAdded += foodSource.getTotalEnergy();
-                    console.log(foodSource);
-                    this.addToEnvironment(foodSource);
-                }
 
+        foodSourceMap.forEach( (value, key) => {
+            //console.log(value, key);
+            if (energyAdded < this.carryingCapacity) {
+                energyAdded += value.currentEnergy;
+                this.addToEnvironment(value);
             }
-        }
-
-        
-
-        
+        });
         
     }
 
     //random food source generator
-    initializeFoodSources () {
+    generateRandomFoodSources () {
+        console.log(`[ENVIRONMENT] Generating random food sources...`);
+        
         let energyAdded = 0;
         while (energyAdded < this.carryingCapacity) {
+            
             let x = Math.floor(Math.random() * this.width);
             let y = Math.floor(Math.random() * this.height);
 
             let energyAmount = Math.floor(Math.random() * 100);
-            
-            let foodSource = new FoodSource(100, Math.floor(Math.random), 0);
-            foodSource.x = x;
-            foodSource.y = y;
+            energyAdded += energyAmount;
 
+            if (energyAdded > this.carryingCapacity) {
+
+                coords = [Math.floor(Math.random() * 100) % this.width, Math.floor(Math.random() * 100) % this.height];
+                let foodSource = new FoodSource(energyAmount, energyAmount, 1, coords);
+                this.addToEnvironment(foodSource);
+
+            }
             //this.map[x][y] = foodSource; <-- we aren't going to assign anything in this map to an object, possibly do a soil simulation eventually
-            energyAdded += foodSource.getTotalEnergy();
         }
     }
 

@@ -19,12 +19,12 @@ var environment = new Environment(envWidth, envHeight, 10000, 24);
 var foodSourceMap = new Map();
 
 //initialize food sources 
-foodSourceMap.set([10, 8], new FoodSource(600, 600, 1));
-foodSourceMap.set([102, 94], new FoodSource(1000, 1000, 1));
-foodSourceMap.set([210, 160], new FoodSource(250, 250, 1));
+foodSourceMap.set([10, 8], new FoodSource(600, 600, 1, [10, 8]));
+foodSourceMap.set([102, 94], new FoodSource(1000, 1000, 1, [102, 94]));
+foodSourceMap.set([210, 160], new FoodSource(250, 250, 1, [210, 160]));
 console.log(foodSourceMap);
 environment.initializeFoodSources(foodSourceMap);
-
+//environment.addToEnvironment(foodSourceMap.get([10, 8]));
 
 // Create a Three.js scene
 var scene = new THREE.Scene();

@@ -3,11 +3,11 @@ class FoodSource {
     x;
     y;
 
-    constructor(totalEnergy, currentEnergy, decayRate = 0) {
+    constructor(totalEnergy, currentEnergy, decayRate = 0, coords) {
         this.totalEnergy = totalEnergy;
         this.currentEnergy = currentEnergy;
         this.decayRate = decayRate;
-
+        [this.x, this.y] = coords || [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
         //generate unique id
         this.id = Math.floor(Math.random() * (totalEnergy * Math.random()) * 100);
     }

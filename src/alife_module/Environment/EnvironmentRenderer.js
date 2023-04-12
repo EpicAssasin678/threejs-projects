@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Environment from './Environment';
 import { foodSourceObject } from '../RenderObjects/FoodSource';
+import {Text} from 'troika-three-text';
 
 class EnvironmentRender {
 
@@ -13,9 +14,8 @@ class EnvironmentRender {
         this.environment = environment;
         this.scene = scene;
 
-        //create the plane for the background 
+        //initialize methods
         this.initEnvironmentForeground();
-
         this.initializeEnvironmentObjects();
         
             
@@ -59,17 +59,24 @@ class EnvironmentRender {
 
         this.foodSources = [];
         this.environment.objects.foodSources.forEach(foodSource => {
-            /**
-             const foodSourceGeometry = new THREE.BoxGeometry(1, 1, 1);
-             const foodSourceMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00}); //green color with a wireframe
-             const foodSourceMesh = new THREE.Mesh(foodSourceGeometry, foodSourceMaterial);
-             foodSourceMesh.position.set(foodSource.x, foodSource.y, 0);
-             * 
-             */
-            console.log(foodSource);
-            this.scene.add(foodSourceObject([foodSource.x, 0, foodSource.y], foodSource.currentEnergy / 100, 0x00ff00));
+            
+            this.scene.add(foodSourceObject([foodSource.x, foodSource.y, 0], foodSource.currentEnergy / 100, 0x00ff00, 
+            () => {
+                //Text decoration to the food source
+                const text = new Text();
+                text.text = `food source ${foodSource.id}`;
+                text.fontSize = 0.5;
+                //white text color 
+                text.color = 0xffffff;
+                text.font = 'Arial';
+                text.position.set(foodSource.x, foodSource.y, 0);
+                text.anchorX = 'center';
+                return text;
+                
+            }));
+            console.log(`[ENVIRONMENT RENDERER] Food source rendered at [${foodSource.x}, ${foodSource.y}]`);
+
         });
-        console.log(this.environment.objects.foodSources);
 
 
         //create a shape for each organism in the environment
