@@ -3,12 +3,12 @@ import EnvironmentRender from '../EnvironmentRenderer';
 
 
 export const organismFactory = (organism, ...coords) => {
-    const [x, y] = coords || [Math.floor(Math.random() * 100), Math.floor(Math.random() * 100)];
-    return organismObject([x , y], organism.size, organism.color, {
+    const [x, y] = coords || [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
+    return organismObject([x , y, 0], organism.size, organism.color, {
         type: 'organism',
         id: organism.id,
         size: organism.size,
-        position: [x,y]
+        position: [x,y,0]
     });
 }
 
@@ -27,7 +27,7 @@ export const organismObject = (position, size, color=0xf55a42, userData) => {
     
     );
     
-    const material = new THREE.MeshBasicMaterial({color: color, wireframe: true});
+    const material = new THREE.MeshBasicMaterial({color: color});
     const cube = new THREE.Mesh(geometry, material);
     cube.position.set(...position);
     cube.rotation.set(0, 0, 0);
@@ -36,7 +36,7 @@ export const organismObject = (position, size, color=0xf55a42, userData) => {
     const group = new THREE.Group().add(cube);
     group.matrixAutoUpdate = true;
 
-    group.userData = userData;
+    group.userData = userData || {};
 
     return group;
 
@@ -47,9 +47,17 @@ class OrganismObject  {
 
     constructor (organism, ...coords) {
         this.organism = organism;
-        this.renderable = organismFactory(organism, [...coords]);
 
-        this.renderable.addEventListener('update', this.update);
+        const [x, y] = [...coords] || [organism.x, organism.y] || [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
+        
+        this.renderable = organismObject([organism.x, organism.y, 0], organism.size, 0xf55a42, {        
+        type: 'organism',
+        id: organism.id,
+        size: organism.size,
+        position: [organism.x,organism.y,0]
+        });
+
+
     }
 
     getDataObject () {
@@ -59,10 +67,10 @@ class OrganismObject  {
     update() {
 
         //update render applicable properties of the mutated data 
-        this.renderable.position.x = this.organism.x;
-        this.renderable.position.y = this.organism.y;
-        this.renderable.userData.position = [this.organism.x, this.organism.y];
-
+        //this.renderable.position.set(this.organism.x, this.organism.y, 0);
+        this.renderable.translateX(this.organism.x - this.renderable.position.x);
+        this.renderable.translateY(this.organism.y - this.renderable.position.y);
+        this.renderable.userData.position = [this.organism.x, this.organism.y, 0];
 
     }
     

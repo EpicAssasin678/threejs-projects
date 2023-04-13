@@ -1,9 +1,11 @@
 class FoodSource {
 
+
     constructor(totalEnergy, currentEnergy, decayRate = 0, coords) {
         this.totalEnergy = totalEnergy;
         this.currentEnergy = currentEnergy;
         this.decayRate = decayRate;
+
         [this.x, this.y] = coords || [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
         //generate unique id
         this.id = Math.floor(Math.random() * (totalEnergy * Math.random()) * 100);
@@ -47,7 +49,9 @@ class FoodSource {
     }
     
     decay () {
+        
         this.currentEnergy -= this.decayRate;
+        console.log(`Decaying food source ${this.id} by ${this.decayRate} units. Current energy: ${this.currentEnergy}`);
     }
 
 }

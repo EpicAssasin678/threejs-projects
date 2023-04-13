@@ -34,11 +34,11 @@ class Simulation extends EventDispatcher {
         });
         //update every food source 
         foodsources.forEach(foodsource => {
-            foodsource.decay();
+            if ( foodsource.currentEnergy - foodsource.decayRate >= 0) foodsource.decay();
         });
         //check for environment conditions
 
-        this.dispatchEvent({type: 'update', message: 'Day cycle completed'});
+        
     }
 }
 

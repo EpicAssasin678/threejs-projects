@@ -5,12 +5,15 @@ export const foodSourceFactory = (foodSource, ...coords) => {
 
     const [x, y] = coords || [Math.floor(Math.random() * 100), Math.floor(Math.random() * 100)];
 
-    return foodSourceObject([x, y], foodSource.size,  0x00ff00 , {
-        type: 'foodSource',
-        id: foodSource.id,
-        size: foodSource.size,
-        position: [x,y]
-    });
+    let group = new THREE.Group().add(
+        foodSourceObject([x, y, 0], foodSource.currentEnergy/100,  0x00ff00 , {
+            type: 'foodSource',
+            id: foodSource.id,
+            size: foodSource.size,
+            position: [x,y]
+        })
+    );
+    return group;
 
 } 
 
@@ -36,16 +39,25 @@ export const foodSourceObject = (position, size, color=0x00ff00, userData, ...de
 class FoodSourceObject {
 
     constructor (foodSource, ...coords) {
+        console.log(`Creating food source object for food source ${foodSource.id}`);
+
+
         this.foodSource = foodSource;
         
         const [x, y] = [...coords] || [Math.floor(Math.random() * 100), Math.floor(Math.random() * 100)];
-        this.renderable = foodSourceObject([x, y], foodSource.size,  0x00ff00 , {
+
+        this.renderable = foodSourceObject([foodSource.x, foodSource.y, 0], foodSource.currentEnergy/100,  0x00ff00 , {
             type: 'foodSource',
             id: foodSource.id,
             size: foodSource.size,
-            position: [x,y]
+            position: [foodSource.x,foodSource.y,0]
         });
     
+
+    }
+
+
+    renderableCreator () {
 
     }
 
@@ -57,9 +69,16 @@ class FoodSourceObject {
     update () {
 
         //update the position of the food source
-        let scaleAmount = (this.foodSource.currentEnergy / 10) % 100;
-        this.renderable.scale.set(scaleAmount, scaleAmount, scaleAmount);
+        let scaleAmount = (1/this.foodSource.totalEnergy);
+        this.renderable = foodSourceObject([this.foodSource.x, this.foodSource.y, 0], this.foodSource.currentEnergy/100,  0x00ff00 , {
+            type: 'foodSource',
+            id: this.foodSource.id,
+            size: this.foodSource.size,
+            position: [this.foodSource.x, this.foodSource.y,0]
+        });
+        this.renderable.scale.set(scaleAmount, scaleAmount, 1);
         
+
 
     }
 

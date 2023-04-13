@@ -30,7 +30,10 @@ environment.initializeFoodSources(foodSourceMap);
 //initialize organisms 
 environment.addToEnvironment(
     new Herbivore(100, 20, 4, 3, 100, 4, [531, 400], environment),
-    new Herbivore(100, 20, 4, 4, 100, 4, [240, 162], environment)
+    new Herbivore(100, 20, 4, 4, 100, 4, [240, 162], environment),
+    new Herbivore(240, 40, 2, 10, 210, 6, [122, 108], environment),
+    new Herbivore(240, 40, 2, 10, 210, 6, [421, 130], environment),
+    new Herbivore(240, 40, 2, 10, 210, 12, [421, 130], environment)
 );
 
 // Create a Three.js scene
@@ -121,30 +124,41 @@ document.addEventListener("keydown", event => {
 //Render variable trackers
 var frameTick = 0;
 
-// Render loop
 var simulation = new Simulation(environment);
 
+// Render loop
+
+let clock = new THREE.Clock();
+let delta = 0;
+// 30 fps
+let interval = 1 / 144;
+
 var render = function() {
-    console.log(`frame rendering`);
     //console.log(`FRAME: ${frameTick}`);
     requestAnimationFrame(render);
+    delta += clock.getDelta();
 
+    if (delta > interval) {
+        
+        controls.update();
+        if (!isStopped) {
+            environmentDisplay.update();
+        } else {
+            return;
+        }
+        renderer.render(scene, camera);
 
-    if (!isStopped) {
-        environmentDisplay.update();
-    } else {
-        return;
+        delta = delta % interval;
     }
+
 
     
     //cube.material.color = `(${(cube.position.x )},${cube.position.y},${cube.rotation.z})`;
 
-    controls.update();
     //simulation.update();
     //console.log(cube.material.color);
     //pause rendering if space is pressed
     frameTick = (frameTick + 1)%60;
-    renderer.render(scene, camera);
 };
 
 export default render;

@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import Environment from '../Environment/Environment';
-import { foodSourceObject } from './FoodSourceObject';
+import FoodSourceObject , { foodSourceObject } from './FoodSourceObject';
 import {Text} from 'troika-three-text';
-import { organismObject } from './Organisms/OrganismObject';
+import OrganismObject, { organismFactory, organismObject } from './Organisms/OrganismObject';
 import Simulation from '../Environment/Simulation';
 
 class EnvironmentRenderer {
@@ -63,7 +63,84 @@ class EnvironmentRenderer {
 
     }
 
+    
     initializeEnvironmentObjects() {
+
+        this.environment.objects.foodSources.forEach(foodSource => {
+            
+            //create renderable object and add it to the scene
+            /**
+             * DEPRECATED 
+            this.renderableObjects.push(foodSourceRenderable);
+            this.scene.add(foodSourceRenderable.renderable);
+            let foodSourceRenderable = foodSourceObject([foodSource.x, foodSource.y, 0], foodSource.currentEnergy / 100,  0x00ff00 , {
+                type: 'foodSource',
+                id: foodSource.id,
+                size: foodSource.size,
+                position: [foodSource.x, foodSource.y]
+            });
+            */
+           
+           
+            let foodSourceRenderable = new FoodSourceObject(foodSource, [foodSource.x, foodSource.y]); 
+            this.renderableObjects.push(foodSourceRenderable);
+            this.scene.add(foodSourceRenderable.renderable);
+
+            console.log(`[ENVIRONMENT RENDERER] Food source rendered at [${foodSource.x}, ${foodSource.y}]`);
+
+        });
+
+
+        //create a shape for each organism in the environment
+        this.environment.objects.organisms.forEach(organism => {
+            //const organismGeometry = new THREE.BoxGeometry(1, 1, 1);
+            //create a shape for the organism with respect to its size
+
+            /**
+             * DEPRECATED
+            let organismObject = new OrganismObject(organism, [organism.x, organism.y]);
+            this.renderableObjects.push(organismObject);
+            this.scene.add(organismObject.renderable);
+             */
+
+            let organismObject = new OrganismObject(organism, [organism.x, organism.y]);
+            this.renderableObjects.push(organismObject);
+            this.scene.add(organismObject.renderable);
+
+            //let organismRenderable = organismObject([organism.x, organism.y, 0], organism.size);
+            //this.renderableObjects.push(organismRenderable);
+            //this.scene.add(organismRenderable);
+
+            console.log(`[ENVIRONMENT RENDERER] Organism rendered at [${organism.x}, ${organism.y}]`);
+                
+        });
+    }
+
+    updateRenderableObjects() {
+        this.renderableObjects.forEach(renderableObject => {
+            renderableObject.update();
+        });
+    }
+
+    update() {
+        
+        //call the update method for each object
+        this.simulation.completeDayCycle();
+        this.updateRenderableObjects();
+        //store each object id as userData in the 3D object and see if the two are equal
+        //if they aren't equal, update the 3D object
+    }
+}
+
+export default EnvironmentRenderer;
+
+
+
+/***
+ * 
+ * 
+ * 
+ *     initializeEnvironmentObjects() {
 
         this.foodSources = [];
         this.environment.objects.foodSources.forEach(foodSource => {
@@ -98,15 +175,4 @@ class EnvironmentRenderer {
                 
         });
     }
-
-    update() {
-        
-        //call the update method for each object
-        this.simulation.completeDayCycle();
-        
-        //store each object id as userData in the 3D object and see if the two are equal
-        //if they aren't equal, update the 3D object
-    }
-}
-
-export default EnvironmentRenderer;
+ */

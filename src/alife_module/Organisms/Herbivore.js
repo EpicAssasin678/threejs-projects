@@ -39,18 +39,35 @@ class Herbivore extends Organism {
      * @param {FoodSource} foodSource 
      */
     feed (foodSource) {
+        console.log(`Organism ${this.id} is feeding`);
         foodSource.deplete(this.consumptionRate);
+    }
+
+    checkIfTravelled (x,y) {
+        return this.memory.traveledPositions.indexOf([x,y]);
     }
 
     
     wander () {
+
         // get a random x between the x coord and the moveable distance
-        let x = this.x + (Math.floor(Math.random() * 100) % this.speed);
-        let y = this.y + (Math.floor(Math.random() * 100) % this.speed);
+        let x = this.x + ((Math.floor(Math.random() * 100) % this.speed) % this.environment.width);
+        let y = this.y + ((Math.floor(Math.random() * 100) % this.speed) % this.environment.height);
         if (Math.random() < 0.5) x *= -1;
         if (Math.random() < 0.5) y *= -1;
         console.log(x, y);
-        this.move(x, y);
+        
+        let traveled = this.checkIfTravelled(x, y);
+        if (traveled < 1) {
+            //check if we are over memory
+            if (this.memory.traveledPositions.length > 200) {
+                this.memory.traveledPositions.shift();
+            }
+            this.memory.traveledPositions.push([x, y]);
+            this.move(x, y);
+        } else {
+            this.wander();
+        }
 
         console.log(`Organism ${this.id} is wandering to ${x}, ${y}`);
     }
@@ -109,6 +126,7 @@ class Herbivore extends Organism {
                         );
                     let sweep = [];
                     
+                    
                     if (environment.objectMap.get([this.x + i, this.y + j]) ) sweep.push(environment.objectMap.get([this.x + i, this.y + j]) );
                     if (environment.objectMap.get([this.x + i, this.y - j]) ) sweep.push(environment.objectMap.get([this.x + i, this.y - j]) );
                     if (environment.objectMap.get([this.x - i, this.y + j]) ) sweep.push(environment.objectMap.get([this.x - i, this.y + j]) );
@@ -119,7 +137,10 @@ class Herbivore extends Organism {
 
                         //check to see if we have already added this object to the array
                         entry.objects.forEach((object) => {
-                            if (!objects.includes(object.id)) objects.push(object.id);
+                            if (!objects.includes(object.id)) {
+                                objects.push(object.id);
+                                console.log(`Organism ${this.id} detected object ${object.id}`);
+                            }
                         });
 
                     });
@@ -178,7 +199,7 @@ class Herbivore extends Organism {
 
             //if there is a food source nearby, move to it
             if (foodSources.length > 0) {
-
+                console.log(`Organism ${this.id} found a food source`);
                 //find nearest food source
                 let nearestFoodSource = foodSources[0];
                 for (let i = 0; i < foodSources.length; i++) {

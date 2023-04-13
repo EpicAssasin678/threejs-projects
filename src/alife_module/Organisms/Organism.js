@@ -89,6 +89,11 @@ class Organism {
             THREAT: Organism.THREAT_STATES.SAFE,
             ACTION: Organism.ACTION_STATES.WANDERING
         }
+
+        this.memory = {
+            traveledPositions: []
+        }
+
     }
 
     generateOID (ids) {
