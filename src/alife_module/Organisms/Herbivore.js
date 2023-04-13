@@ -1,12 +1,15 @@
 import AnimalStates, {STATES} from "./AnimalStates.js";
 import Organism from "./Organism.js";
 import Environment from "../Environment/Environment.js";
+import FoodSource from "../Environment/FoodSource.js";
 
 /**
  * @todo implement organism size detection (in detecting especially)
  */
 class Herbivore extends Organism {
     
+    
+
     /**
      * @extends Organism
      * @param {Number} consumptionRate amount of energy in respective units that the organism consumes per feeding
@@ -15,13 +18,16 @@ class Herbivore extends Organism {
      */
 
     constructor (bodyMass, consumptionRate, speed, vision, currentEnergy, size, currentCords, environment) {
-        super(bodyMass, currentEnergy, size, currentCords, environment);
-        this.speed = speed;
+        super(bodyMass, currentEnergy, size, speed, currentCords, environment);
+        
         this.vision = vision;
+        this.consumptionRate = consumptionRate;
         this.currentEnergy = currentEnergy;
 
         //identification properties 
         
+        
+
     }
 
     initializeState (...stateArgs) {
@@ -36,19 +42,47 @@ class Herbivore extends Organism {
         foodSource.deplete(this.consumptionRate);
     }
 
+    
     wander () {
-        let x = Math.floor(Math.random() * this.width);
-        let y = Math.floor(Math.random() * this.height);
-        this.cordX = x;
-        this.cordY = y;
+        // get a random x between the x coord and the moveable distance
+        let x = this.x + (Math.floor(Math.random() * 100) % this.speed);
+        let y = this.y + (Math.floor(Math.random() * 100) % this.speed);
+        if (Math.random() < 0.5) x *= -1;
+        if (Math.random() < 0.5) y *= -1;
+        console.log(x, y);
+        this.move(x, y);
 
         console.log(`Organism ${this.id} is wandering to ${x}, ${y}`);
     }
-
-    moveTo (xMod, yMod) {
-        this.cordX += xMod;
-        this.cordY += yMod;
+    
+    /**
+     * 
+     * @param {*} x 
+     * @param {*} y 
+     */
+    move (x, y) {
+        //! might want to check if the movement is diagonal, in which case it would be counted as 1 movement
+        let movementLength = Math.sqrt(Math.pow(Math.abs(x - this.x), 2) + Math.pow(Math.abs(y - this.y), 2)); //equation should work
+        //see if we move the whole amount, or just part of it
+        //todo track diagonals 
+        
+        //check if coords are diagonal to our current position
+        this.moveTo(x, y);
+        this.remainingMovement -= movementLength;
     }
+
+    moveToObject (object) {
+        move(object.y, object.x);
+    }
+
+    distanceToObject (object) {
+        return Math.sqrt(Math.pow(Math.abs(object.x - this.x), 2) + Math.pow(Math.abs(object.y - this.y), 2));
+    }
+
+    metabolize (metabolismMod) {
+        this.currentEnergy -= this.bodyMass * metabolismMod;
+    }
+    
 
     /**
      * Detects objects in the vision range of the organism.
@@ -58,6 +92,7 @@ class Herbivore extends Organism {
      * 
      */
     detectSurroundings (environment) {
+        console.log(`Organism ${this.id} is detecting surroundings, vision: ${this.vision}`);
         let objects = [];
         //radial sweep for vision
         for (let i = 0; i < this.vision; i++) {
@@ -66,12 +101,18 @@ class Herbivore extends Organism {
                 if (Math.sqrt(Math.pow(i, 2) + Math.pow(j, 2)) < this.vision) {
                     //todo implement check for size 
                     //let sweep = [ environment.objectMap[this.cordX + i, this.cordY + j], environment.objectMap[this.cordX + i, this.cordY - j], environment.objectMap[this.cordX - i, this.cordY + j], environment.objectMap[this.cordX - i, this.cordY - j]];
+                    console.log(
+                        [this.x + i, this.y + j], 
+                        [this.x + i, this.y - j],
+                        [this.x - i, this.y + j],
+                        [this.x - i, this.y - j]
+                        );
                     let sweep = [];
                     
-                    if (environment.objectMap.get([this.cordX + i, this.cordY + j]) ) sweep.push(environment.objectMap.get([this.cordX + i, this.cordY + j]) );
-                    if (environment.objectMap.get([this.cordX + i, this.cordY - j]) ) sweep.push(environment.objectMap.get([this.cordX + i, this.cordY - j]) );
-                    if (environment.objectMap.get([this.cordX - i, this.cordY + j]) ) sweep.push(environment.objectMap.get([this.cordX - i, this.cordY + j]) );
-                    if (environment.objectMap.get([this.cordX - i, this.cordY - j]) ) sweep.push(environment.objectMap.get([this.cordX - i, this.cordY - j]) );
+                    if (environment.objectMap.get([this.x + i, this.y + j]) ) sweep.push(environment.objectMap.get([this.x + i, this.y + j]) );
+                    if (environment.objectMap.get([this.x + i, this.y - j]) ) sweep.push(environment.objectMap.get([this.x + i, this.y - j]) );
+                    if (environment.objectMap.get([this.x - i, this.y + j]) ) sweep.push(environment.objectMap.get([this.x - i, this.y + j]) );
+                    if (environment.objectMap.get([this.x - i, this.y - j]) ) sweep.push(environment.objectMap.get([this.x - i, this.y - j]) );
                     
                     //adds all swept entries to known objects without duplicates 
                     sweep.forEach((entry) => {
@@ -83,7 +124,6 @@ class Herbivore extends Organism {
 
                     });
                     //adds all information to an array of objects 
-                    
                 }
             }
         }
@@ -91,16 +131,76 @@ class Herbivore extends Organism {
         return objects;
     }
 
+    /**
+     * Evaluates the organisms environment and alters the state of the organism accordingly.
+     * 
+     * TODO once traits implemented, remove bodyMassMod and instead use the instance field bodyMass
+     */
+    evaluateState (bodyMassMod) {
+        //check if hungry or starving
+        console.log(`Organism ${this.id} is evaluating state`);
+
+        if (this.currentEnergy < (this.bodyMass *  bodyMassMod)) {
+            this.STATE.HUNGER = ( this.currentEnergy < 0 ) ? Organism.HUNGER_STATES.STARVING : Organism.HUNGER_STATES.HUNGRY;
+        } else {
+            if (this.currentEnergy > (this.bodyMass * bodyMassMod)) {
+                this.STATE.HUNGER = Organism.HUNGER_STATES.FULL;
+            }
+        }
+        //todo check for predators
+
+        //todo check for age parameters 
+        
+    }
+
 
     //FOR ORIENTING CONTROLS
-    decideAction (calorieConversion) {
+    decideAction (calorieConversion=13) {
+        console.log(`Organism ${this.id} is deciding an action`);
+        
         //check surroundings for objects 
         let objects = this.detectSurroundings(this.environment);
+        this.evaluateState(calorieConversion);
+        //configure state for decision making 
+        console.log(this.STATE);
 
-        let bodyMassMod = calorieConversion || 13;
-        if (this.currentEnergy < (bodyMass *  bodyMassMod)) {
-            
+
+        if (this.STATE.HUNGER == Organism.HUNGER_STATES.HUNGRY || Organism.HUNGER_STATES.STARVING) {
+            console.log(`Organism ${this.id} is ${this.STATE.HUNGER}`);
+
+            //check if there is a food source nearby
+            let foodSources = [];
+            objects.forEach((object) => {
+                if (object.type == FoodSource) {
+                    foodSources.push(object);
+                }
+            });
+
+            //if there is a food source nearby, move to it
+            if (foodSources.length > 0) {
+
+                //find nearest food source
+                let nearestFoodSource = foodSources[0];
+                for (let i = 0; i < foodSources.length; i++) {
+                    if (this.distanceToObject(foodSources[i]) < this.distanceToObject(nearestFoodSource)) {
+                        nearestFoodSource = foodSources[i];
+                    }
+                }
+                
+                this.moveToObject(nearestFoodSource);
+                if (this.distanceToObject(nearestFoodSource) < 1) this.feed(nearestFoodSource); //if we are close enough, feed
+                
+            } else {
+                //if there is no food source nearby, wander
+                console.log(`Organism ${this.id} decided to wander`);
+                this.wander();
+            }
         }
+        
+
+
+        //metabolize energy
+        this.metabolize(calorieConversion);
     }
 
 

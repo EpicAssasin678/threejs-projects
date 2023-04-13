@@ -1,9 +1,11 @@
 import * as THREE from 'three';
-import Environment from './Environment';
-import { foodSourceObject } from '../RenderObjects/FoodSource';
+import Environment from '../Environment/Environment';
+import { foodSourceObject } from './FoodSourceObject';
 import {Text} from 'troika-three-text';
+import { organismObject } from './Organisms/OrganismObject';
+import Simulation from '../Environment/Simulation';
 
-class EnvironmentRender {
+class EnvironmentRenderer {
 
     /**
      * 
@@ -14,6 +16,10 @@ class EnvironmentRender {
         this.environment = environment;
         this.scene = scene;
 
+        this.renderableObjects = [];
+
+        this.simulation = new Simulation(environment);
+
         //initialize methods
         this.initEnvironmentForeground();
         this.initializeEnvironmentObjects();
@@ -21,6 +27,8 @@ class EnvironmentRender {
             
         console.log(`[ENVIRONMENT RENDERER] Environment rendered. [${this.environment.width} x ${this.environment.height}]`);
         console.log(this.environment.objects);
+
+        
     }
         
     initEnvironmentForeground() {
@@ -60,6 +68,7 @@ class EnvironmentRender {
         this.foodSources = [];
         this.environment.objects.foodSources.forEach(foodSource => {
             
+            
             this.scene.add(foodSourceObject([foodSource.x, foodSource.y, 0], foodSource.currentEnergy / 100, 0x00ff00, 
             () => {
                 //Text decoration to the food source
@@ -84,25 +93,20 @@ class EnvironmentRender {
         this.environment.objects.organisms.forEach(organism => {
             //const organismGeometry = new THREE.BoxGeometry(1, 1, 1);
             //create a shape for the organism with respect to its size
-            const organismGeometry = new THREE.ShapeGeometry( 
-                new THREE.Shape([ 
-                    new THREE.Vector2(0, 0), 
-                    new THREE.Vector2(organism.size, 0), 
-                    new THREE.Vector2(organism.size, organismref.size), 
-                    new THREE.Vector2(0, organism.size) 
-                ])
-                );
+            this.scene.add(organismObject([organism.x, organism.y, 0], organism.size));
+            console.log(`[ENVIRONMENT RENDERER] Organism rendered at [${organism.x}, ${organism.y}]`);
                 
-                const organismMaterial = new THREE.MeshBasicMaterial({color: 0xff0000}); //red color
-                const organismMesh = new THREE.Mesh(organismGeometry, organismMaterial);
-                organismMesh.position.set(organism.x, organism.y, 0);
-                this.scene.add(organismMesh);
         });
     }
 
     update() {
-
+        
+        //call the update method for each object
+        this.simulation.completeDayCycle();
+        
+        //store each object id as userData in the 3D object and see if the two are equal
+        //if they aren't equal, update the 3D object
     }
 }
 
-export default EnvironmentRender;
+export default EnvironmentRenderer;

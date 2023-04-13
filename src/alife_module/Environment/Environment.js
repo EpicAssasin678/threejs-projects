@@ -1,8 +1,9 @@
+import { EventDispatcher } from "three";
 import Organism from "../Organisms/Organism";
 import FoodSource from "./FoodSource.js";
-class Environment {
-    
 
+class Environment extends EventDispatcher {
+    
     static reference;
      
     /**
@@ -13,6 +14,9 @@ class Environment {
      * Only supports rectangular shaped environments
      */
     constructor (width=1920, height=1080, carryingCapacity=10000, dayCycle=24) {
+
+        super();
+
         this.width = width;
         this.height = height;
         this.carryingCapacity = carryingCapacity;
@@ -50,34 +54,34 @@ class Environment {
      * @param {Organism} object - the object to be added to the map
      * 
      */
-    addToEnvironment (object) {
+    addToEnvironment (...objects) {
         //see if any objects are already at the location
-        try{
-            if (this.objectMap.has([object.x, object.y])) {
-                const value = this.objectMap.get([object.x, object.y]);
-                //add the object to the object map
-                this.objectMap.set([object.x, object.y], {objects : [...value, object.id] });
-                (object instanceof Organism) ? this.objects.organisms.push(object.id, object) : this.objects.foodSources.push(object.id, object);
-                //add the object to the other tiles of the array that the 
-            } else {
-                this.objectMap.set([object.x, object.y], {objects : {[object.id] : object } });
-                (object instanceof Organism) ? this.objects.organisms.set(object.id, object) : this.objects.foodSources.set(object.id, object);
+        objects.forEach(object => {
+            try{
+                if (this.objectMap.has([object.x, object.y])) {
+                    const value = this.objectMap?.get([object.x, object.y]);
+                    //add the object to the object map
+                    this.objectMap.set([object.x, object.y], {objects : [...value, object.id] });
+                    (object instanceof Organism) ? this.objects.organisms.set(object.id, object) : this.objects.foodSources.set(object.id, object);
+                    //add the object to the other tiles of the array that the 
+                } else {
+                    this.objectMap.set([object.x, object.y], {objects : {[object.id] : object } });
+                    (object instanceof Organism) ? this.objects.organisms.set(object.id, object) : this.objects.foodSources.set(object.id, object);
+                }
+                console.log(`[ENVIRONMENT] Object map updated. Added ${typeof object} at ${object.x}, ${object.y}.`);
+                return true;
+            } catch (e) {
+                console.log(`[ENVIRONMENT] Error adding object to environment. ${e}`);
+                return false;
             }
-            console.log(`[ENVIRONMENT] Object map updated. Added ${object} at ${object.x}, ${object.y}.`)
-            return true;
-        } catch (e) {
-            console.log(`[ENVIRONMENT] Error adding object to environment. ${e}`);
-            return false;
-        }
+        });
     }
 
 
     /**
      * Initializes food sources and adds them to the environment map.
      * 
-     * 
-     * 
-     * @param {Map} foodSourceMap - a map of food sources which are objects and their locations respectively 
+     * @param {Map} foodSourceMap a map of food sources which are objects and their locations respectively 
      *  
      * Note: carryingCapacity determines the maximum amount of energy that can be stored in the environment 
      */
@@ -111,6 +115,7 @@ class Environment {
 
             if (energyAdded > this.carryingCapacity) {
 
+                //add to env
                 coords = [Math.floor(Math.random() * 100) % this.width, Math.floor(Math.random() * 100) % this.height];
                 let foodSource = new FoodSource(energyAmount, energyAmount, 1, coords);
                 this.addToEnvironment(foodSource);
@@ -118,6 +123,25 @@ class Environment {
             }
             //this.map[x][y] = foodSource; <-- we aren't going to assign anything in this map to an object, possibly do a soil simulation eventually
         }
+    }
+
+
+    /**
+     * Getter for objects at coords
+     * @param {Number} x position of the object
+     * @param {Number} y position
+     * @returns reference from the object Map
+     */
+    getObjectAtCords (x, y) {
+        return this.objectMap.get([x, y]);
+    }
+
+    getOrganisms () {
+        return this.objects.organisms;
+    }
+
+    getFoodSources () {
+        return this.objects.foodSources;
     }
 
     //create day cycle clock 

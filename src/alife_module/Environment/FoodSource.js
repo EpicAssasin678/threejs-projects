@@ -1,8 +1,5 @@
 class FoodSource {
 
-    x;
-    y;
-
     constructor(totalEnergy, currentEnergy, decayRate = 0, coords) {
         this.totalEnergy = totalEnergy;
         this.currentEnergy = currentEnergy;
@@ -49,6 +46,9 @@ class FoodSource {
         return this.decayRate;
     }
     
+    decay () {
+        this.currentEnergy -= this.decayRate;
+    }
 
 }
 

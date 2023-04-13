@@ -3,9 +3,10 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import Environment from './Environment/Environment.js';
 import Herbivore from './Organisms/Herbivore.js';
 import FoodSource from './Environment/FoodSource.js';
-import EnvironmentRenderer from './Environment/EnvironmentRenderer.js';
+import EnvironmentRenderer from './RenderObjects/EnvironmentRenderer.js';
 import { Text } from 'troika-three-text';
 import { axisArrows, referenceRectangle } from './RenderObjects/renderUtils.js';
+import Simulation from './Environment/Simulation.js';
 
 /**
  * Author: darkf0xTV 
@@ -25,6 +26,12 @@ foodSourceMap.set([210, 160], new FoodSource(250, 250, 1, [210, 160]));
 console.log(foodSourceMap);
 environment.initializeFoodSources(foodSourceMap);
 //environment.addToEnvironment(foodSourceMap.get([10, 8]));
+
+//initialize organisms 
+environment.addToEnvironment(
+    new Herbivore(100, 20, 4, 3, 100, 4, [531, 400], environment),
+    new Herbivore(100, 20, 4, 4, 100, 4, [240, 162], environment)
+);
 
 // Create a Three.js scene
 var scene = new THREE.Scene();
@@ -107,6 +114,7 @@ document.addEventListener("keydown", event => {
             break;
     }
 });
+
 //event listener for hovering 
 
 
@@ -114,22 +122,29 @@ document.addEventListener("keydown", event => {
 var frameTick = 0;
 
 // Render loop
+var simulation = new Simulation(environment);
+
 var render = function() {
     console.log(`frame rendering`);
     //console.log(`FRAME: ${frameTick}`);
     requestAnimationFrame(render);
+
+
     if (!isStopped) {
-        
+        environmentDisplay.update();
     } else {
-        
+        return;
     }
-    //cube.material.color = `(${(cube.position.x )},${cube.position.y},${cube.rotation.z})`;
 
     
+    //cube.material.color = `(${(cube.position.x )},${cube.position.y},${cube.rotation.z})`;
+
     controls.update();
+    //simulation.update();
     //console.log(cube.material.color);
-    
-    renderer.render(scene, camera);
+    //pause rendering if space is pressed
     frameTick = (frameTick + 1)%60;
+    renderer.render(scene, camera);
 };
+
 export default render;
