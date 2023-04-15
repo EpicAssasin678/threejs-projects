@@ -3,9 +3,9 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import Environment from './Environment/Environment.js';
 import Herbivore from './Organisms/Herbivore.js';
 import FoodSource from './Environment/FoodSource.js';
-import EnvironmentRenderer from './RenderObjects/EnvironmentRenderer.js';
+import EnvironmentRenderer from './ThreeJSRenderer/RenderObjects/EnvironmentRenderer.js';
 import { Text } from 'troika-three-text';
-import { axisArrows, referenceRectangle } from './RenderObjects/renderUtils.js';
+import { axisArrows, referenceRectangle } from './ThreeJSRenderer/RenderObjects/renderUtils.js';
 import Simulation from './Environment/Simulation.js';
 
 /**
@@ -14,15 +14,22 @@ import Simulation from './Environment/Simulation.js';
  */
 
 
+
+
 // ALife module initialization 
 const [envWidth, envHeight] = [680, 680];
-var environment = new Environment(envWidth, envHeight, 10000, 24);
+var environment = new Environment(envWidth, envHeight, 1000000, 24);
 var foodSourceMap = new Map();
+
 
 //initialize food sources 
 foodSourceMap.set([10, 8], new FoodSource(600, 600, 1, [10, 8]));
 foodSourceMap.set([102, 94], new FoodSource(1000, 1000, 1, [102, 94]));
 foodSourceMap.set([210, 160], new FoodSource(250, 250, 1, [210, 160]));
+foodSourceMap.set([82, 437], new FoodSource(350, 350, 1, [82, 437]));
+foodSourceMap.set([308, 16], new FoodSource(500, 500, 1, [308, 16]));
+foodSourceMap.set([512, 300], new FoodSource(1200, 1200, 1, [512, 300]));
+foodSourceMap.set([345, 600], new FoodSource(1200, 1200, 1 , [345, 600]));
 console.log(foodSourceMap);
 environment.initializeFoodSources(foodSourceMap);
 //environment.addToEnvironment(foodSourceMap.get([10, 8]));
@@ -30,11 +37,20 @@ environment.initializeFoodSources(foodSourceMap);
 //initialize organisms 
 environment.addToEnvironment(
     new Herbivore(100, 20, 4, 3, 100, 4, [531, 400], environment),
-    new Herbivore(100, 20, 4, 4, 100, 4, [240, 162], environment),
-    new Herbivore(240, 40, 2, 10, 210, 6, [122, 108], environment),
-    new Herbivore(240, 40, 2, 10, 210, 6, [421, 130], environment),
-    new Herbivore(240, 40, 2, 10, 210, 12, [421, 130], environment)
-);
+    new Herbivore(100, 20, 4, 3, 100, 4, [envWidth/2, envHeight/2], environment),
+    );
+    
+    /**
+     new Herbivore(100, 20, 4, 4, 100, 4, [240, 162], environment),
+     new Herbivore(240, 40, 2, 1, 210, 6, [122, 108], environment),
+     new Herbivore(256, 40, 2, 1, 210, 6, [421, 130], environment),
+     new Herbivore(350, 40, 2, 1, 210, 12, [300, 130], environment)
+     * 
+    */
+
+
+
+
 
 // Create a Three.js scene
 var scene = new THREE.Scene();
@@ -45,24 +61,29 @@ var scene = new THREE.Scene();
 //const camera = new THREE.OrthographicCamera(-window.innerWidth / 2, window.innerWidth / 2, window.innerHeight / 2, -window.innerHeight / 2, 1, 1000);
 const camera = new THREE.OrthographicCamera(0, envWidth, envHeight, 0, 1, 1000);
 
+
 //set camera position to fixed
+camera.rotation.set(0, 0, 0);
 camera.position.set(0, 0, 10);
 //camera.position.set(envWidth/2, envHeight/2, 0);
-camera.rotation.set(0, 0, 0);
 //camera.lookAt(0, 0, 0);
 
-var renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 
 //initialize ALife renderer
 console.log(`Initializing environment renderer`);
-var environmentDisplay = new EnvironmentRenderer(environment, scene);
+const environmentDisplay = new EnvironmentRenderer(environment, scene);
+
+
+
+
 
 
 //add title text 
-var titleText = new Text();
+const titleText = new Text();
 titleText.text = 'ALife Simulation';
 titleText.fontSize = 10;
 titleText.font = 'Arial';
@@ -76,16 +97,16 @@ scene.add(
     referenceRectangle([0,0,0], 'origin'), 
     referenceRectangle([envWidth/2, envHeight/2, 0], 'center'),
     referenceRectangle([envWidth, envHeight, 0], 'top right'),
-    axisArrows()
+    
     );
 
 //add orbit controls
 const controls = new OrbitControls( camera, renderer.domElement );
+controls.enableRotate = false;
 
-
-var previousMouseX = 0;
-var mouseSpeed = 0;
-var isStopped = false;
+const previousMouseX = 0;
+let mouseSpeed = 0;
+let isStopped = false;
 
 
 document.addEventListener("keydown", event => {
@@ -126,6 +147,8 @@ var frameTick = 0;
 
 var simulation = new Simulation(environment);
 
+
+
 // Render loop
 
 let clock = new THREE.Clock();
@@ -140,17 +163,17 @@ var render = function() {
 
     if (delta > interval) {
         
-        controls.update();
         if (!isStopped) {
             environmentDisplay.update();
         } else {
             return;
         }
-        renderer.render(scene, camera);
-
+        
         delta = delta % interval;
     }
-
+    
+    renderer.render(scene, camera);
+    controls.update();
 
     
     //cube.material.color = `(${(cube.position.x )},${cube.position.y},${cube.rotation.z})`;

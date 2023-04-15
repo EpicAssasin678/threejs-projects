@@ -90,10 +90,10 @@ class Organism {
             ACTION: Organism.ACTION_STATES.WANDERING
         }
 
+        
         this.memory = {
             traveledPositions: []
         }
-
     }
 
     generateOID (ids) {
@@ -112,8 +112,8 @@ class Organism {
     moveTo (xMod, yMod) {
         //check if the organism has any movement left 
         
-        this.x = xMod;
-        this.y = yMod;
+        this.x = xMod % this.environment.width;
+        this.y = yMod % this.environment.height;
     }
     
 }

@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import Environment from '../Environment/Environment';
+import Environment from '../../Environment/Environment';
 import FoodSourceObject , { foodSourceObject } from './FoodSourceObject';
 import {Text} from 'troika-three-text';
 import OrganismObject, { organismFactory, organismObject } from './Organisms/OrganismObject';
-import Simulation from '../Environment/Simulation';
+import Simulation from '../../Environment/Simulation';
 
 class EnvironmentRenderer {
 
@@ -32,6 +32,7 @@ class EnvironmentRenderer {
     }
         
     initEnvironmentForeground() {
+
         //add a line to the scene the width of the environment
         let points = [];
         points.push(new THREE.Vector3(0, 0, 0));
@@ -39,6 +40,13 @@ class EnvironmentRenderer {
         const widthLineGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const lineMaterial = new THREE.LineBasicMaterial({color: 0xFFFFFF});
         this.scene.add(new THREE.Line(widthLineGeometry, lineMaterial));
+        
+        let points3 = [];
+        points3.push(new THREE.Vector3(0, this.environment.height, 0));
+        points3.push(new THREE.Vector3(this.environment.width, this.environment.height, 0));
+        const widthLineGeometry2 = new THREE.BufferGeometry().setFromPoints(points3);
+        this.scene.add(new THREE.Line(widthLineGeometry2, lineMaterial));
+        
         //add a line to scene for the height of the environment
         let points2 = [];
         points2.push(new THREE.Vector3(0, 0, 0));
@@ -46,11 +54,6 @@ class EnvironmentRenderer {
         const heightLineGeometry = new THREE.BufferGeometry().setFromPoints(points2);
         this.scene.add(new THREE.Line(heightLineGeometry, lineMaterial));
         
-        let points3 = [];
-        points3.push(new THREE.Vector3(0, this.environment.height, 0));
-        points3.push(new THREE.Vector3(this.environment.width, this.environment.height, 0));
-        const widthLineGeometry2 = new THREE.BufferGeometry().setFromPoints(points3);
-        this.scene.add(new THREE.Line(widthLineGeometry2, lineMaterial));
 
         let points4 = [];
         points4.push(new THREE.Vector3(this.environment.width, this.environment.height, 0));
@@ -60,27 +63,12 @@ class EnvironmentRenderer {
         //create a square for each tile in the environment
         this.tiles = [];
         
-
     }
 
     
     initializeEnvironmentObjects() {
 
         this.environment.objects.foodSources.forEach(foodSource => {
-            
-            //create renderable object and add it to the scene
-            /**
-             * DEPRECATED 
-            this.renderableObjects.push(foodSourceRenderable);
-            this.scene.add(foodSourceRenderable.renderable);
-            let foodSourceRenderable = foodSourceObject([foodSource.x, foodSource.y, 0], foodSource.currentEnergy / 100,  0x00ff00 , {
-                type: 'foodSource',
-                id: foodSource.id,
-                size: foodSource.size,
-                position: [foodSource.x, foodSource.y]
-            });
-            */
-           
            
             let foodSourceRenderable = new FoodSourceObject(foodSource, [foodSource.x, foodSource.y]); 
             this.renderableObjects.push(foodSourceRenderable);
@@ -118,7 +106,7 @@ class EnvironmentRenderer {
 
     updateRenderableObjects() {
         this.renderableObjects.forEach(renderableObject => {
-            renderableObject.update();
+            renderableObject.update(this.scene);
         });
     }
 
@@ -127,8 +115,7 @@ class EnvironmentRenderer {
         //call the update method for each object
         this.simulation.completeDayCycle();
         this.updateRenderableObjects();
-        //store each object id as userData in the 3D object and see if the two are equal
-        //if they aren't equal, update the 3D object
+        
     }
 }
 

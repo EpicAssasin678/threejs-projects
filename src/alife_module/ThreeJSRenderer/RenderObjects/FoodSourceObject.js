@@ -69,14 +69,8 @@ class FoodSourceObject {
     update () {
 
         //update the position of the food source
-        let scaleAmount = (1/this.foodSource.totalEnergy);
-        this.renderable = foodSourceObject([this.foodSource.x, this.foodSource.y, 0], this.foodSource.currentEnergy/100,  0x00ff00 , {
-            type: 'foodSource',
-            id: this.foodSource.id,
-            size: this.foodSource.size,
-            position: [this.foodSource.x, this.foodSource.y,0]
-        });
-        this.renderable.scale.set(scaleAmount, scaleAmount, 1);
+        let scaleAmount = (this.foodSource.currentEnergy/this.foodSource.totalEnergy);
+        
         
 
 

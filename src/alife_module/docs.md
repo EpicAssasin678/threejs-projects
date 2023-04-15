@@ -41,4 +41,6 @@ integrate evolution into the speciation process.
 3. Integrate water needs and sunlight distribution.
 4. Create a genetics system. 
 4.5: Create memory for food, predation, and environment.
-5. 3D???
+5. Create a picker for the organisms and food which will display stats. (OPTIONAL) Have the camera track the object while it is clicked and add an escape option.
+6. GUI
+7. 3D???

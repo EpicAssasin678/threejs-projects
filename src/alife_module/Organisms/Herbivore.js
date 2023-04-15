@@ -51,10 +51,11 @@ class Herbivore extends Organism {
     wander () {
 
         // get a random x between the x coord and the moveable distance
-        let x = this.x + ((Math.floor(Math.random() * 100) % this.speed) % this.environment.width);
-        let y = this.y + ((Math.floor(Math.random() * 100) % this.speed) % this.environment.height);
-        if (Math.random() < 0.5) x *= -1;
-        if (Math.random() < 0.5) y *= -1;
+        let x = this.x + ((Math.floor(Math.random() * 100) % this.speed) );
+        let y = this.y + ((Math.floor(Math.random() * 100) % this.speed) );
+
+
+        
         console.log(x, y);
         
         let traveled = this.checkIfTravelled(x, y);
@@ -73,13 +74,18 @@ class Herbivore extends Organism {
     }
     
     /**
+     * Movement function which wraps the moveTo function of an organism. Checks 
+     * for certain triggers and conditions before moving.
+     * 
+     * If the coords move outside of the environment, the organism will wrap around. Uses modulo.
+     * Also prevents movement farther than the organism's remaining movement.
      * 
      * @param {*} x 
      * @param {*} y 
      */
     move (x, y) {
         //! might want to check if the movement is diagonal, in which case it would be counted as 1 movement
-        let movementLength = Math.sqrt(Math.pow(Math.abs(x - this.x), 2) + Math.pow(Math.abs(y - this.y), 2)); //equation should work
+        let movementLength = Math.sqrt(Math.pow((x - this.x), 2) + Math.pow((y - this.y), 2)); //equation should work
         //see if we move the whole amount, or just part of it
         //todo track diagonals 
         
@@ -89,11 +95,11 @@ class Herbivore extends Organism {
     }
 
     moveToObject (object) {
-        move(object.y, object.x);
+        this.move(object.x, object.y);
     }
 
     distanceToObject (object) {
-        return Math.sqrt(Math.pow(Math.abs(object.x - this.x), 2) + Math.pow(Math.abs(object.y - this.y), 2));
+        return Math.sqrt(Math.pow(object.x - this.x, 2) + Math.pow(object.y - this.y, 2));
     }
 
     metabolize (metabolismMod) {
@@ -101,6 +107,7 @@ class Herbivore extends Organism {
     }
     
 
+    
     /**
      * Detects objects in the vision range of the organism.
      * @param {Array} environment - reference of the Environment object
@@ -126,7 +133,11 @@ class Herbivore extends Organism {
                         );
                     let sweep = [];
                     
-                    
+                    /**
+                     * Current method for sweeping leads to a bug where the organism will flutter around all four of these coordinates.
+                     * Essentially this issue creates three 'phantom' organisms moving the same as the real
+                     * 
+                     */
                     if (environment.objectMap.get([this.x + i, this.y + j]) ) sweep.push(environment.objectMap.get([this.x + i, this.y + j]) );
                     if (environment.objectMap.get([this.x + i, this.y - j]) ) sweep.push(environment.objectMap.get([this.x + i, this.y - j]) );
                     if (environment.objectMap.get([this.x - i, this.y + j]) ) sweep.push(environment.objectMap.get([this.x - i, this.y + j]) );
@@ -215,6 +226,7 @@ class Herbivore extends Organism {
                 //if there is no food source nearby, wander
                 console.log(`Organism ${this.id} decided to wander`);
                 this.wander();
+                //this.moveToObject(this.environment.objects.foodSources[0]);
             }
         }
         
