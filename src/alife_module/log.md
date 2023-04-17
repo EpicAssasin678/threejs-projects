@@ -20,3 +20,14 @@ of coords previously travelled and is checked before moving to a new coord to pr
 
 Vision needs to be optomized, right now, the average vision of a creature is far 
 too low and needs to be increased for environments.
+
+> Update 
+I fixed the entirety of my vision, detection, and simulation issues. Although right now this codebase has become quite spaghetti-ish. 
+
+Outlining the general decision making processes for the organisms, I came up with the following map:
+
+![Mind Map][https://viewer.diagrams.net/?tags=%7B%7D&highlight=000000&edit=_blank&layers=1&nav=1&title=Organism%20Decision%20Process#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1SaZB0cG2C9LcF4wtFZg8GxlAzOMRyXjI%26export%3Ddownload]
+
+
+<img src="https://viewer.diagrams.net/?tags=%7B%7D&highlight=000000&edit=_blank&layers=1&nav=1&title=Organism%20Decision%20Process#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1SaZB0cG2C9LcF4wtFZg8GxlAzOMRyXjI%26export%3Ddownload" />
+
