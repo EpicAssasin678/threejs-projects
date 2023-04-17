@@ -47,6 +47,11 @@ class FoodSource {
     getDecayRate() {
         return this.decayRate;
     }
+
+    isDepleted() { 
+        return this.currentEnergy <= 0;
+    }
+    
     
     decay () {
         

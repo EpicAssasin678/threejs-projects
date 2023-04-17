@@ -31,7 +31,11 @@ ThreeJS is used for rendering the simulation. But their does exist a data pipeli
 
 ## Organism 
 
-Every organism has a to simulate movement
+Every organism has a to simulate movement, retain memory, and evolve.
+
+### Memory 
+
+Memory right now consists of moved spaces, found objects, etc.
 
 ## TODO 
 

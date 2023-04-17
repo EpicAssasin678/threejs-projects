@@ -16,11 +16,20 @@ class Simulation extends EventDispatcher {
     constructor(environment) {
         super();
         this.environment = environment;
+        this.simulationTime = 0; //in unit time of environment 
         
+        this.died = {
+            organisms: [],
+            foodSources: []
+        };
     }
 
     /**
      * Completes one day which is a cycle of the environment and the organisms.
+     * 
+     * Decay should happen every constant of n intervals in environemnt's respective time unit. Suggestion, create a enumerable 
+     * which contains all static constants for the simulation.
+     * 
      */
     completeDayCycle() {
         //import day cycle from environment 
@@ -30,15 +39,51 @@ class Simulation extends EventDispatcher {
         //make every organism decide their action 
         
         organisms.forEach(organism => {
-            organism.decideAction();
+            if (organism.STATE.ALIVE) {
+                //refill movement 
+                organism.refillMovement();
+                organism.decideAction();
+            } else {
+                this.died.organisms.push(organism.id);
+
+                //if dead, remove from environment
+            }
+
         });
+
         //update every food source 
         foodsources.forEach(foodsource => {
+
             if ( foodsource.currentEnergy - foodsource.decayRate >= 0) foodsource.decay();
+            if ( foodsource.isDepleted() ) {
+                
+                this.died.foodSources.push(foodsource.id);
+
+            }
+
         });
         //check for environment conditions
 
         
+    }
+
+    removeDead () {
+
+
+       this.died.organisms.forEach(id => {
+            this.environment.removeOrganism(this.environment.objects.organisms.get(id));
+       });
+
+       this.died.foodSources.forEach(id => {
+            this.environment.removeFoodSource(this.environment.objects.foodSources.get(id));
+       });
+
+       this.died = {
+            organisms: [],
+            foodSources: []
+        };
+
+
     }
 }
 

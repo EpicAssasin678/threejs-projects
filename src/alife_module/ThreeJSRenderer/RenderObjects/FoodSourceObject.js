@@ -6,7 +6,7 @@ export const foodSourceFactory = (foodSource, ...coords) => {
     const [x, y] = coords || [Math.floor(Math.random() * 100), Math.floor(Math.random() * 100)];
 
     let group = new THREE.Group().add(
-        foodSourceObject([x, y, 0], foodSource.currentEnergy/100,  0x00ff00 , {
+        foodSourceObject([x, y, 0], (foodSource.currentEnergy/100) /( foodSource.environment.width * foodSource.environment.height),  0x00ff00 , {
             type: 'foodSource',
             id: foodSource.id,
             size: foodSource.size,

@@ -15,6 +15,10 @@ class Herbivore extends Organism {
      * @param {Number} consumptionRate amount of energy in respective units that the organism consumes per feeding
      * @param {Number} speed amount of units the organism moves in one instance of movement
      * @param {Number} vision amount of units the organism can see in all directions
+     * 
+     * We remove also the prey key within the organism's memory
+     * 
+     * ! Make speed at least greater than 4
      */
 
     constructor (bodyMass, consumptionRate, speed, vision, currentEnergy, size, currentCords, environment) {
@@ -26,8 +30,19 @@ class Herbivore extends Organism {
 
         //identification properties 
         
-        
+        this.TRAITS = {
+            VISION_TYPE: Organism.TRAIT_OPTIONS.VISION.RADIAL,
+            
+        }
 
+        this.FLAGS = {
+            DEAD: bodyMass * 0.50,
+            
+        }
+
+        this.memory.remove('prey');
+
+        console.log(this.FLAGS);
     }
 
     initializeState (...stateArgs) {
@@ -36,11 +51,16 @@ class Herbivore extends Organism {
 
     /**
      * Feeding for herbivores depletes foodSource by consumptionRate of the organism.
+     * 
+     * todo add belly modification for larger consumption of calories per feeding
+     * 
      * @param {FoodSource} foodSource 
      */
     feed (foodSource) {
         console.log(`Organism ${this.id} is feeding`);
         foodSource.deplete(this.consumptionRate);
+        this.currentEnergy += this.consumptionRate * this.size;
+        console.log(`${this.consumptionRate * this.size }`)
     }
 
     checkIfTravelled (x,y) {
@@ -66,14 +86,13 @@ class Herbivore extends Organism {
         //const desiredcords = [this.x + xChange, this.y + yChange];
         const [x, y] = [this.x + xChange, this.y + yChange];
 
-        let traveled = this.checkIfTravelled(`${x},${y}`);
-        
         if (!this.memory.traveledPositions.includes(`${x},${y}`)) {
             //check if we are over memory
             if (this.memory.traveledPositions.length > 500) {
                 this.memory.traveledPositions.shift();
             }
             this.memory.traveledPositions.push(`${x},${y}`);
+            console.log(`Organism ${this.id} is wandering to ${x}, ${y}`);
             this.move(x, y);
 
         } else {
@@ -81,7 +100,6 @@ class Herbivore extends Organism {
             this.wander();
         }
 
-        console.log(`Organism ${this.id} is wandering to ${x}, ${y}`);
     }
 
     wander3() {
@@ -169,17 +187,76 @@ class Herbivore extends Organism {
     }
 
     moveToObject (object) {
-        this.move(object.x, object.y);
+        
+        let xDistance = object.x - this.x;
+        let yDistance = object.y - this.y;
+
+        this.move((xDistance % this.remainingMovement) + this.x , (yDistance % this.remainingMovement) + this.y );
     }
 
     distanceToObject (object) {
         return Math.sqrt(Math.pow(object.x - this.x, 2) + Math.pow(object.y - this.y, 2));
     }
 
-    metabolize (metabolismMod) {
+
+    /**
+     * Metabolizes the organism's energy based on its body mass.
+     * 
+     * If the organism has no energy in fat reserves, it begins to starve.
+     * 
+     * @param {Number} metabolismMod multiplicative modifier for metabolism
+     */
+    metabolize (metabolismMod = 13) {
+        console.log(`Organism ${this.id} is metabolizing.`)
+            
+        //BME equation from Harris-Benedict revised by Cole equation 
+        //see https://www.calculator.net/bmr-calculator.html
+        const BME = 6.0767 * this.bodyMass + 12.18945 * this.size - 5.677 * this.age + 88.362
         this.currentEnergy -= this.bodyMass * metabolismMod;
+
+        
+
+        
+        console.log(`Metabolized ${this.bodyMass * metabolismMod}cal Has ${this.currentEnergy}cal energy left.`);
+
+        //check if we are starving
+        if (this.currentEnergy < 0) {
+
+            let starvedWeight = this.starve(metabolismMod);
+            console.log(`Organism ${this.id} metabolized ${starvedWeight} lbs of fat. Current body mass is ${this.bodyMass} lbs.`)
+        
+        } else {
+            
+        }
+
+        
+    }
+
+    // Returns the amount of energy the organism has in fat reserves per one unit of body mass
+    starve (metabolismMod = 13 , fatEnergyDensity = 3500) {
+
+        //todo implement starvation
+        let unitWeightLoss = 0;
+        while (this.currentEnergy < 0) {
+
+            if ( this.bodyMass <= this.FLAGS.DEAD || this.bodyMass <= 0 ) {
+                this.die();
+                console.log(`Organism ${this.id} has died of starvation.`);
+                break;
+            }
+
+            unitWeightLoss = Math.abs((1 / fatEnergyDensity) * this.currentEnergy);
+            this.currentEnergy += unitWeightLoss * fatEnergyDensity;
+            this.bodyMass -= unitWeightLoss;
+        }
+        
+        return unitWeightLoss;
+
     }
     
+    die () {
+        this.STATE.ALIVE = false;
+    }
 
     
     /**
@@ -211,7 +288,7 @@ class Herbivore extends Organism {
                     if (environment.objectMap.get(`${this.x - i},${this.y + j}`) ) sweep.push(environment.objectMap.get(`${this.x - i},${this.y + j}`) );
                     if (environment.objectMap.get(`${this.x - i},${this.y - j}`) ) sweep.push(environment.objectMap.get(`${this.x - i},${this.y - j}`) );
                     
-                    console.log(`Swept ${sweep}`);
+                    if (sweep.length > 0) console.log(`Swept ${sweep}`);
 
                     //adds all swept entries to known objects without duplicates 
                     sweep.forEach((entry) => {
@@ -262,21 +339,25 @@ class Herbivore extends Organism {
         console.log(this.STATE);
 
 
-        if (this.STATE.HUNGER == Organism.HUNGER_STATES.HUNGRY || Organism.HUNGER_STATES.STARVING) {
+        if (this.STATE.HUNGER === Organism.HUNGER_STATES.HUNGRY || Organism.HUNGER_STATES.STARVING) {
             console.log(`Organism ${this.id} is ${this.STATE.HUNGER}`);
 
             //check if there is a food source nearby
             let foodSources = [];
             objects.forEach((object) => {
-                if (object.type == FoodSource) {
+                if (this.environment.objects.foodSources.get(object)) {
                     console.log(`Organism ${this.id} found a food source`);
-                    foodSources.push(object);
+                    foodSources.push(this.environment.objects.foodSources.get(object));
+                } 
+
+                if (this.environment.objects.organisms.get(object)) {
+                    
                 }
+
             });
 
             //if there is a food source nearby, move to it
             if (foodSources.length > 0) {
-                console.log(`Organism ${this.id} found a food source`);
                 //find nearest food source
                 let nearestFoodSource = foodSources[0];
                 for (let i = 0; i < foodSources.length; i++) {
@@ -286,14 +367,20 @@ class Herbivore extends Organism {
                 }
                 
                 this.moveToObject(nearestFoodSource);
-                if (this.distanceToObject(nearestFoodSource) < 1) this.feed(nearestFoodSource); //if we are close enough, feed
-                
+                if (this.distanceToObject(nearestFoodSource) < 1) {
+                    console.log(`Organism ${this.id} is close enough to feed`);
+                    this.feed(nearestFoodSource); //if we are close enough, feed
+                }
             } else {
                 //if there is no food source nearby, wander
                 console.log(`Organism ${this.id} decided to wander`);
                 this.wander();
                 //this.moveToObject(this.environment.objects.foodSources[0]);
             }
+        } else {
+            //if not hungry, wander
+            console.log(`Organism ${this.id} decided to wander`);
+            this.wander();
         }
         
 

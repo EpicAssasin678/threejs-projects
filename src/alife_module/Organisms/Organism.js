@@ -18,6 +18,14 @@
  */
 class Organism {
 
+    static TRAIT_OPTIONS = {
+        VISION: {
+            RADIAL: 'RADIAL',
+            CONE: 'CONE',
+            RECTANGULAR: 'RECTANGULAR'
+        }
+    }
+
     static MOVEMENT_STATES = {
         IDLE: 'IDLE',
         NORMAL: 'NORMAL',
@@ -81,6 +89,7 @@ class Organism {
 
         this.id = this.generateOID(environment.objects.organisms);
 
+        this.age = 1;
         //initial state map
         this.STATE = {
             ALIVE: true, 
@@ -93,8 +102,30 @@ class Organism {
 
         
         this.memory = {
-            traveledPositions: []
+            traveledPositions: [],
+            foodSource: [],
+            predators: [],
+            prey: [],
+            mates: [],
+
+            //create iterable method called 
+            [Symbol.iterator]: function* () {
+                yield* Object.values(this);
+            },
+            //add function to create new keys
+            add: function (key, value) {
+                this[key] = value;
+            },
+            //add function to remove keys
+            remove: function (key) {
+                delete this[key];
+            }
+
+            
+            
         }
+
+
     }
 
     generateOID (ids) {
@@ -111,10 +142,18 @@ class Organism {
      * @param {Number} yMod movement in the y direction to finish at
      */
     moveTo (xMod, yMod) {
-        //check if the organism has any movement left 
+        const [oldX, oldY] = [this.x, this.y];
         
         this.x = Math.abs(xMod % this.environment.width);
         this.y = Math.abs(yMod % this.environment.height);
+
+        //update the environment's map
+        this.environment.updateObjectCoordinates(this, [oldX, oldY], [this.x, this.y]);
+    }
+
+
+    refillMovement (modifier=0) {
+        this.remainingMovement = modifier + this.speed;
     }
     
 }

@@ -18,29 +18,46 @@ import Simulation from './Environment/Simulation.js';
 
 // ALife module initialization 
 const [envWidth, envHeight] = [680, 680];
-var environment = new Environment(envWidth, envHeight, 1000000, 24);
+var environment = new Environment(envWidth, envHeight, 100000, 24);
 var foodSourceMap = new Map();
 
 
 //initialize food sources 
 foodSourceMap.set([10, 8], new FoodSource(600, 600, 1, [10, 8]));
-foodSourceMap.set([102, 94], new FoodSource(1000, 1000, 1, [102, 94]));
+foodSourceMap.set([102, 94], new FoodSource(1000, 1000, 0.5, [102, 94]));
 foodSourceMap.set([210, 160], new FoodSource(250, 250, 1, [210, 160]));
 foodSourceMap.set([82, 437], new FoodSource(350, 350, 1, [82, 437]));
 foodSourceMap.set([308, 16], new FoodSource(500, 500, 1, [308, 16]));
-foodSourceMap.set([512, 300], new FoodSource(1200, 1200, 1, [512, 300]));
+foodSourceMap.set([512, 300], new FoodSource(1200, 1200, 0.25, [512, 300]));
 foodSourceMap.set([345, 600], new FoodSource(1200, 1200, 1 , [345, 600]));
+foodSourceMap.set([600, 100], new FoodSource(1000, 1000, 0.5, [ 600, 100 ]));
+
 console.log(foodSourceMap);
 environment.initializeFoodSources(foodSourceMap);
 //environment.addToEnvironment(foodSourceMap.get([10, 8]));
 
+const organisms = [
+    new Herbivore(150, 3600, 4, 30, 360, 4, [15, 8], environment),
+    new Herbivore(100, 2000, 4, 10, 100, 4, [240, 162], environment),
+    new Herbivore(80, 3000, 6, 10, 210, 6, [122, 108], environment),
+    new Herbivore(180, 1500, 8, 10, 210, 6, [421, 130], environment),
+
+]
 //initialize organisms 
-environment.addToEnvironment(
+
+organisms.forEach( (organism) => {
+    environment.addToEnvironment(organism);
+})
+
+
+/* environment.addToEnvironment(
     new Herbivore(100, 20, 4, 3, 100, 4, [531, 400], environment),
-    new Herbivore(100, 20, 4, 3, 100, 4, [envWidth/2, envHeight/2], environment),
-    );
+    new Herbivore(300, 20, 4, 3, 100, 4, [15, 8], environment),
+    
+    ); */
     
     /**
+     new Herbivore(100, 20, 4, 3, 100, 4, [envWidth/2, envHeight/2], environment),
      new Herbivore(100, 20, 4, 4, 100, 4, [240, 162], environment),
      new Herbivore(240, 40, 2, 1, 210, 6, [122, 108], environment),
      new Herbivore(256, 40, 2, 1, 210, 6, [421, 130], environment),
@@ -59,7 +76,7 @@ var scene = new THREE.Scene();
 //create a fixed camera with perspective in only x and y
 //var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 //const camera = new THREE.OrthographicCamera(-window.innerWidth / 2, window.innerWidth / 2, window.innerHeight / 2, -window.innerHeight / 2, 1, 1000);
-const camera = new THREE.OrthographicCamera(0, envWidth, envHeight, 0, 1, 1000);
+const camera = new THREE.OrthographicCamera(0, envWidth, envHeight, 0, 1, 10000 );
 
 
 //set camera position to fixed
@@ -99,6 +116,9 @@ scene.add(
     referenceRectangle([envWidth, envHeight, 0], 'top right'),
     
     );
+    
+//var simulation = new Simulation(environment);
+
 
 //add orbit controls
 const controls = new OrbitControls( camera, renderer.domElement );
@@ -145,7 +165,10 @@ document.addEventListener("keydown", event => {
 //Render variable trackers
 var frameTick = 0;
 
-var simulation = new Simulation(environment);
+
+// GUI creation 
+
+
 
 
 
@@ -154,7 +177,7 @@ var simulation = new Simulation(environment);
 let clock = new THREE.Clock();
 let delta = 0;
 // 30 fps
-let interval = 1 / 144;
+let interval = 1 / 30;
 
 var render = function() {
     //console.log(`FRAME: ${frameTick}`);

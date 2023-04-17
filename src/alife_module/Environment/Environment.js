@@ -35,7 +35,7 @@ class Environment extends EventDispatcher {
         this.objectMap = new Map();
         this.objects = {
             organisms: new Map(), 
-            foodSources: new Map()
+            foodSources: new Map(),
         };
         
         Environment.reference = this; //!trick to get a reference to the environment object, might change later
@@ -158,6 +158,62 @@ class Environment extends EventDispatcher {
 
     //create food and source monitoring 
 
+    removeOrganism (organism) {
+        console.log(`[ENVIRONMENT] Removing organism at ${organism.x}, ${organism.y}`);
+
+        this.objects.organisms.delete(organism.id);
+        
+        let object = this.objectMap.get(`${organism.x},${organism.y}`);
+        if (object.objects.length > 1) { 
+            //remove the organism from the object map
+            object.objects = object.objects.filter( (id) => id !== organism.id);
+        } else {
+            this.objectMap.delete(`${organism.x},${organism.y}`);
+        }
+        
+    }
+
+    removeFoodSource (foodSource) {
+        console.log(`[ENVIRONMENT] Removing food source at ${foodSource.x}, ${foodSource.y}`);
+
+        this.objects.foodSources.delete(foodSource.id);
+
+        //check if any other object is at the same coordinates
+        let object = this.objectMap.get(`${foodSource.x},${foodSource.y}`);
+        if (object.objects.length > 1) {
+            //remove the food source from the object map
+            object.objects = object.objects.filter( (id) => id !== foodSource.id);
+        } else {
+            this.objectMap.delete(`${foodSource.x},${foodSource.y}`);
+        }
+        
+        
+    }
+
+    /**
+     * Updates the object map with the new coordinates of the object
+     * Note: Do this before updating the object's coordinates in other places
+     * 
+     * @param {Organism} organism - the object to be updated
+     * @param {Array} oldCords - the old coordinates of the object
+     * @param {Array} newCords - the new coordinates of the object
+     * 
+     */
+    updateObjectCoordinates (organism, oldCords, newCords) {
+
+        //remove the object from the old coordinates in the object map
+        let object = this.objectMap.get(`${oldCords[0]},${oldCords[1]}`);
+
+        //remove the object from the old coordinates
+        object.objects = object.objects.filter( (id) => id !== organism.id);
+
+        //if there are no more objects at the old coordinates, remove the key
+        if (object.objects.length === 0)  this.objectMap.delete(`${oldCords[0]},${oldCords[1]}`);
+
+        let res = this.objectMap.get(`${newCords[0]},${newCords[1]}`);
+        (res) ? res.objects.push(organism.id) : this.objectMap.set(`${newCords[0]},${newCords[1]}`, { objects: [organism.id] });
+        
+    }
     
 }
 

@@ -48,12 +48,14 @@ export const visionSweep = (position, option='RADIAL', radius, ) => {
         
         case 'RADIAL':
             let radialSweep = new THREE.Mesh( 
-                new THREE.CircleGeometry(radius, radius * 2, Math.PI/4, Math.PI*1.25 ),
-                new THREE.MeshBasicMaterial({color: 0xffdb9c, opacity: 0.5})
+                new THREE.CircleGeometry(radius, radius * 2, Math.PI/4, Math.PI/2 ),
+                new THREE.MeshBasicMaterial({color: 0xffdb9c, opacity: 1})
             );
+
             radialSweep.position.set(...position);
             radialSweep.rotation.set(0,0,0);
             radialSweep.scale.set(1,1,1);
+            return radialSweep;
 
         default:
 

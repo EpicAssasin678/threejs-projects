@@ -12,6 +12,7 @@ class EnvironmentRenderer {
      * @param {Environment} environment Environment object to render
      * @param {THREE.Scene} scene THREE.js scene object
      */
+
     constructor(environment, scene) {
         this.environment = environment;
         this.scene = scene;
@@ -105,7 +106,19 @@ class EnvironmentRenderer {
 
     updateRenderableObjects() {
         this.renderableObjects.forEach(renderableObject => {
+
             renderableObject.update(this.scene);
+
+            //remove the organism from the scene if it is dead 
+            if (renderableObject instanceof OrganismObject && !renderableObject.organism.STATE.ALIVE) {
+                this.scene.remove(renderableObject.renderable);
+                this.renderableObjects.splice(this.renderableObjects.indexOf(renderableObject), 1);
+            } else if (renderableObject instanceof FoodSourceObject && renderableObject.foodSource.currentEnergy <= 0) {
+                this.scene.remove(renderableObject.renderable);
+                this.renderableObjects.splice(this.renderableObjects.indexOf(renderableObject), 1);
+            }
+
+
         });
     }
 
@@ -114,9 +127,11 @@ class EnvironmentRenderer {
         //call the update method for each object
         this.simulation.completeDayCycle();
         this.updateRenderableObjects();
-        
+
+        this.simulation.removeDead();
 
     }
+    
 }
 
 export default EnvironmentRenderer;
