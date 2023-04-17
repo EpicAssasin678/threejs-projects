@@ -26,6 +26,7 @@ class Organism {
     
     static ACTION_STATES = {
         EATING: 'EATING',
+        FORAGING: 'FORAGING',
         WANDERING: 'WANDERING', 
         SLEEPING: 'SLEEPING',
         REPRODUCTING: 'REPRODUCTING',
@@ -112,8 +113,8 @@ class Organism {
     moveTo (xMod, yMod) {
         //check if the organism has any movement left 
         
-        this.x = xMod % this.environment.width;
-        this.y = yMod % this.environment.height;
+        this.x = Math.abs(xMod % this.environment.width);
+        this.y = Math.abs(yMod % this.environment.height);
     }
     
 }

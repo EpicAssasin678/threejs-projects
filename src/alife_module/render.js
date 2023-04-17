@@ -172,8 +172,8 @@ var render = function() {
         delta = delta % interval;
     }
     
-    renderer.render(scene, camera);
     controls.update();
+    renderer.render(scene, camera);
 
     
     //cube.material.color = `(${(cube.position.x )},${cube.position.y},${cube.rotation.z})`;

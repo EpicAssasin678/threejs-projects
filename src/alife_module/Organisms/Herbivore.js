@@ -44,29 +44,103 @@ class Herbivore extends Organism {
     }
 
     checkIfTravelled (x,y) {
-        return this.memory.traveledPositions.indexOf([x,y]);
+        
+        return this.memory.traveledPositions.indexOf(`${x},${y}`);
     }
 
     
     wander () {
 
         // get a random x between the x coord and the moveable distance
-        let x = this.x + ((Math.floor(Math.random() * 100) % this.speed) );
-        let y = this.y + ((Math.floor(Math.random() * 100) % this.speed) );
 
+        // make it random wether it goes forward or backward
+        let xChange =  ( (Math.floor(Math.random() * 100) % this.speed) );
+        let yChange = ( (Math.floor(Math.random() * 100) % this.speed) );
+
+        if (Math.random() > 0.5 ) xChange*= -1;
+        if (Math.random() > 0.5 ) yChange*= -1;
+
+        
+        console.log(xChange, yChange);
+        console.log(this.memory);        
+        //const desiredcords = [this.x + xChange, this.y + yChange];
+        const [x, y] = [this.x + xChange, this.y + yChange];
+
+        let traveled = this.checkIfTravelled(`${x},${y}`);
+        
+        if (!this.memory.traveledPositions.includes(`${x},${y}`)) {
+            //check if we are over memory
+            if (this.memory.traveledPositions.length > 500) {
+                this.memory.traveledPositions.shift();
+            }
+            this.memory.traveledPositions.push(`${x},${y}`);
+            this.move(x, y);
+
+        } else {
+            console.log(`Organism ${this.id} has already traveled to ${x}, ${y}`);
+            this.wander();
+        }
+
+        console.log(`Organism ${this.id} is wandering to ${x}, ${y}`);
+    }
+
+    wander3() {
+        // get a random x between the x coord and the moveable distance
+
+        // make it random wether it goes forward or backward
+        let x =  ( (Math.floor(Math.random() * 100) % this.speed) );
+        let y = ( (Math.floor(Math.random() * 100) % this.speed) );
+
+        if (Math.random() > 0.5 ) x*= -1;
+        if (Math.random() > 0.5 ) y*= -1;
 
         
         console.log(x, y);
         
         let traveled = this.checkIfTravelled(x, y);
         if (traveled < 1) {
+            
             //check if we are over memory
-            if (this.memory.traveledPositions.length > 200) {
+            if (this.memory.traveledPositions.length > 500) {
+                this.memory.traveledPositions.shift();
+            }
+            this.memory.traveledPositions.push([this.x + x, y]);
+            this.move(this.x + x, this.y + y);
+
+        } else {
+            console.log(`Organism ${this.id} has already traveled to ${x}, ${y}`);
+            this.wander();
+        }
+
+        console.log(`Organism ${this.id} is wandering to ${x}, ${y}`);
+    }
+
+
+    /**
+     * With memory, without sporatic
+     * Wanders diagonally, but only in random positive slope.
+     */
+    wander2 () {
+        // get a random x between the x coord and the moveable distance
+
+        // make it random wether it goes forward or backward
+        let x =  this.x + ( (Math.floor(Math.random() * 100) % this.speed) );
+        let y = this.y + ( (Math.floor(Math.random() * 100) % this.speed) );
+        
+        console.log(x, y);
+        
+        let traveled = this.checkIfTravelled(x, y);
+        if (traveled < 1) {
+            
+            //check if we are over memory
+            if (this.memory.traveledPositions.length > 500) {
                 this.memory.traveledPositions.shift();
             }
             this.memory.traveledPositions.push([x, y]);
             this.move(x, y);
+
         } else {
+            console.log(`Organism ${this.id} has already traveled to ${x}, ${y}`);
             this.wander();
         }
 
@@ -119,18 +193,12 @@ class Herbivore extends Organism {
         console.log(`Organism ${this.id} is detecting surroundings, vision: ${this.vision}`);
         let objects = [];
         //radial sweep for vision
-        for (let i = 0; i < this.vision; i++) {
-            for (let j = 0; j < this.vision; j++) {
+        for (let i = 1; i < this.vision; i++) {
+            for (let j = 1; j < this.vision; j++) {
                 //check if object is in range
                 if (Math.sqrt(Math.pow(i, 2) + Math.pow(j, 2)) < this.vision) {
                     //todo implement check for size 
                     //let sweep = [ environment.objectMap[this.cordX + i, this.cordY + j], environment.objectMap[this.cordX + i, this.cordY - j], environment.objectMap[this.cordX - i, this.cordY + j], environment.objectMap[this.cordX - i, this.cordY - j]];
-                    console.log(
-                        [this.x + i, this.y + j], 
-                        [this.x + i, this.y - j],
-                        [this.x - i, this.y + j],
-                        [this.x - i, this.y - j]
-                        );
                     let sweep = [];
                     
                     /**
@@ -138,24 +206,20 @@ class Herbivore extends Organism {
                      * Essentially this issue creates three 'phantom' organisms moving the same as the real
                      * 
                      */
-                    if (environment.objectMap.get([this.x + i, this.y + j]) ) sweep.push(environment.objectMap.get([this.x + i, this.y + j]) );
-                    if (environment.objectMap.get([this.x + i, this.y - j]) ) sweep.push(environment.objectMap.get([this.x + i, this.y - j]) );
-                    if (environment.objectMap.get([this.x - i, this.y + j]) ) sweep.push(environment.objectMap.get([this.x - i, this.y + j]) );
-                    if (environment.objectMap.get([this.x - i, this.y - j]) ) sweep.push(environment.objectMap.get([this.x - i, this.y - j]) );
+                    if (environment.objectMap.get(`${this.x + i},${this.y + i}`) ) sweep.push(environment.objectMap.get(`${this.x + i},${this.y + i}`) );
+                    if (environment.objectMap.get(`${this.x + i},${this.y - j}`) ) sweep.push(environment.objectMap.get(`${this.x + i},${this.y - j}`) );
+                    if (environment.objectMap.get(`${this.x - i},${this.y + j}`) ) sweep.push(environment.objectMap.get(`${this.x - i},${this.y + j}`) );
+                    if (environment.objectMap.get(`${this.x - i},${this.y - j}`) ) sweep.push(environment.objectMap.get(`${this.x - i},${this.y - j}`) );
                     
+                    console.log(`Swept ${sweep}`);
+
                     //adds all swept entries to known objects without duplicates 
                     sweep.forEach((entry) => {
-
-                        //check to see if we have already added this object to the array
-                        entry.objects.forEach((object) => {
-                            if (!objects.includes(object.id)) {
-                                objects.push(object.id);
-                                console.log(`Organism ${this.id} detected object ${object.id}`);
-                            }
-                        });
-
+                        entry.objects.forEach( id => {
+                          objects.includes(id) ? null : objects.push(id);  
+                        })
                     });
-                    //adds all information to an array of objects 
+                    
                 }
             }
         }
@@ -166,6 +230,7 @@ class Herbivore extends Organism {
     /**
      * Evaluates the organisms environment and alters the state of the organism accordingly.
      * 
+     * Body mass mod for now is only a constant, but will be a trait in the future. Used for cal conversion.
      * TODO once traits implemented, remove bodyMassMod and instead use the instance field bodyMass
      */
     evaluateState (bodyMassMod) {
@@ -204,6 +269,7 @@ class Herbivore extends Organism {
             let foodSources = [];
             objects.forEach((object) => {
                 if (object.type == FoodSource) {
+                    console.log(`Organism ${this.id} found a food source`);
                     foodSources.push(object);
                 }
             });

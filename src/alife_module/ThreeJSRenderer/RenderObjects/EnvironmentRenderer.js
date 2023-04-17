@@ -27,8 +27,7 @@ class EnvironmentRenderer {
             
         console.log(`[ENVIRONMENT RENDERER] Environment rendered. [${this.environment.width} x ${this.environment.height}]`);
         console.log(this.environment.objects);
-
-        
+        console.log(this.environment.objectMap);        
     }
         
     initEnvironmentForeground() {
@@ -116,6 +115,7 @@ class EnvironmentRenderer {
         this.simulation.completeDayCycle();
         this.updateRenderableObjects();
         
+
     }
 }
 

@@ -12,6 +12,9 @@ class Environment extends EventDispatcher {
      * 
      * Creates a new Environment with a width and height and a map of tiles with whatever needed 
      * Only supports rectangular shaped environments
+     * 
+     * ObjectMap: object with the following pair stricutre: string(x,y) : object
+     * 
      */
     constructor (width=1920, height=1080, carryingCapacity=10000, dayCycle=24) {
 
@@ -57,19 +60,22 @@ class Environment extends EventDispatcher {
     addToEnvironment (...objects) {
         //see if any objects are already at the location
         objects.forEach(object => {
+
             try{
-                if (this.objectMap.has([object.x, object.y])) {
-                    const value = this.objectMap?.get([object.x, object.y]);
+
+                if (this.objectMap.has(`${object.x},${object.y}`)) {
                     //add the object to the object map
-                    this.objectMap.set([object.x, object.y], {objects : [...value, object.id] });
+                    this.objectMap?.get(`${object.x},${object.y}`)?.objects.push(object.id);
                     (object instanceof Organism) ? this.objects.organisms.set(object.id, object) : this.objects.foodSources.set(object.id, object);
                     //add the object to the other tiles of the array that the 
                 } else {
-                    this.objectMap.set([object.x, object.y], {objects : {[object.id] : object } });
+                    this.objectMap.set(`${object.x},${object.y}`, { objects : [object.id] });
                     (object instanceof Organism) ? this.objects.organisms.set(object.id, object) : this.objects.foodSources.set(object.id, object);
                 }
                 console.log(`[ENVIRONMENT] Object map updated. Added ${typeof object} at ${object.x}, ${object.y}.`);
                 return true;
+
+
             } catch (e) {
                 console.log(`[ENVIRONMENT] Error adding object to environment. ${e}`);
                 return false;
@@ -113,7 +119,7 @@ class Environment extends EventDispatcher {
             let energyAmount = Math.floor(Math.random() * 100);
             energyAdded += energyAmount;
 
-            if (energyAdded > this.carryingCapacity) {
+            if (energyAdded < this.carryingCapacity) {
 
                 //add to env
                 coords = [Math.floor(Math.random() * 100) % this.width, Math.floor(Math.random() * 100) % this.height];
@@ -133,7 +139,7 @@ class Environment extends EventDispatcher {
      * @returns reference from the object Map
      */
     getObjectAtCords (x, y) {
-        return this.objectMap.get([x, y]);
+        return this.objectMap.get(`${x},${y}`);
     }
 
     getOrganisms () {
@@ -156,3 +162,5 @@ class Environment extends EventDispatcher {
 }
 
 export default Environment;
+
+

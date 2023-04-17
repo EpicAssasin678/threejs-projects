@@ -22,7 +22,6 @@ export const foodSourceObject = (position, size, color=0x00ff00, userData, ...de
     const geometry = new THREE.BoxGeometry(size, size, size);
     const material = new THREE.MeshBasicMaterial({color: color});
     const cube = new THREE.Mesh(geometry, material);
-    cube.position.set(...position);
     cube.rotation.set(0, 0, 0);
     cube.scale.set(1, 1, 1);
 
@@ -52,7 +51,8 @@ class FoodSourceObject {
             size: foodSource.size,
             position: [foodSource.x,foodSource.y,0]
         });
-    
+        
+        this.renderable.position.set(foodSource.x, foodSource.y, 0);
 
     }
 
@@ -70,9 +70,7 @@ class FoodSourceObject {
 
         //update the position of the food source
         let scaleAmount = (this.foodSource.currentEnergy/this.foodSource.totalEnergy);
-        
-        
-
+        this.renderable.scale.set(scaleAmount, scaleAmount, scaleAmount);
 
     }
 
