@@ -20,6 +20,7 @@ class EnvironmentRenderer {
         this.renderableObjects = [];
 
         this.simulation = new Simulation(environment);
+        this.simulation.config.fdecay = false;
 
         //initialize methods
         this.initEnvironmentForeground();
@@ -125,6 +126,7 @@ class EnvironmentRenderer {
     update() {
         
         //call the update method for each object
+        
         this.simulation.completeDayCycle();
         this.updateRenderableObjects();
 

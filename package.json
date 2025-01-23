@@ -24,6 +24,7 @@
     "serve": "webpack serve"
   },
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "three": "^0.149.0",
     "three-addons": "^1.2.0",
     "troika-three-text": "^0.47.1"

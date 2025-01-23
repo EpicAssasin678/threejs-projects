@@ -49,7 +49,7 @@ export const organismObject = (position, size, color=0xf55a42, userData) => {
 }
 
 export const visionRangeVisualizer = ( organism ) => {
-    switch (organism.TRAITS.VISION_TYPE) {
+    switch (organism.TRAITS.VISION) {
         case 'RADIAL':
             let radialSweep = new THREE.Mesh( 
                 new THREE.CircleGeometry( organism.visionRange , 32, 0, Math.PI * 2),

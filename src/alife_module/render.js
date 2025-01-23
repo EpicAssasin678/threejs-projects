@@ -34,22 +34,35 @@ foodSourceMap.set([600, 100], new FoodSource(1000, 1000, 0.5, [ 600, 100 ]));
 
 console.log(foodSourceMap);
 environment.initializeFoodSources(foodSourceMap);
+environment.generateRandomFoodSources();
 //environment.addToEnvironment(foodSourceMap.get([10, 8]));
 
 const organisms = [
-    new Herbivore(150, 3600, 4, 30, 360, 4, [15, 8], environment),
+    new Herbivore(150, 3600, 16, 100, 360, 4, [15, 8], environment),
+    new Herbivore(110, 3600, 16, 100, 360, 4, [3, 8], environment),
     new Herbivore(100, 2000, 4, 10, 100, 4, [240, 162], environment),
     new Herbivore(80, 3000, 6, 10, 210, 6, [122, 108], environment),
     new Herbivore(180, 1500, 8, 10, 210, 6, [421, 130], environment),
+    new Herbivore(180, 1500, 8, 10, 210, 6, [421, 130], environment),
+    new Herbivore(180, 1500, 8, 10, 210, 6, [421, 130], environment),
+    new Herbivore(180, 1500, 8, 10, 210, 6, [421, 130], environment),
+    new Herbivore(180, 1500, 8, 10, 210, 6, [421, 130], environment),
+    new Herbivore(180, 1500, 8, 10, 210, 6, [421, 130], environment),
+    new Herbivore(180, 1500, 8, 10, 210, 6, [421, 130], environment),
+
 
 ]
+
+
 //initialize organisms 
 
 organisms.forEach( (organism) => {
     environment.addToEnvironment(organism);
 })
 
-
+/**
+ * 
+ */
 /* environment.addToEnvironment(
     new Herbivore(100, 20, 4, 3, 100, 4, [531, 400], environment),
     new Herbivore(300, 20, 4, 3, 100, 4, [15, 8], environment),

@@ -30,6 +30,7 @@ class FoodSource {
 
     deplete(amount) {
         this.currentEnergy -= amount;
+        console.log(`Depleting food source ${this.id} by ${amount} units. Current energy: ${this.currentEnergy}`);
     }
 
     increase(amount) {
@@ -56,7 +57,7 @@ class FoodSource {
     decay () {
         
         this.currentEnergy -= this.decayRate;
-        console.log(`Decaying food source ${this.id} by ${this.decayRate} units. Current energy: ${this.currentEnergy}`);
+        //console.log(`Decaying food source ${this.id} by ${this.decayRate} units. Current energy: ${this.currentEnergy}`);
     }
 
 }

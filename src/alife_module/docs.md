@@ -48,3 +48,9 @@ integrate evolution into the speciation process.
 5. Create a picker for the organisms and food which will display stats. (OPTIONAL) Have the camera track the object while it is clicked and add an escape option.
 6. GUI
 7. 3D???
+
+
+
+## Future
+
+I had a couple ideas to study this further with AI. Maybe have chatGPT write move functions and parameter configuration for the traits of an organism and then return back to it the success of that organism. Then ask it to write an improvement and so on.

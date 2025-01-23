@@ -113,20 +113,20 @@ class Environment extends EventDispatcher {
         let energyAdded = 0;
         while (energyAdded < this.carryingCapacity) {
             
-            let x = Math.floor(Math.random() * this.width);
-            let y = Math.floor(Math.random() * this.height);
+            let x = Math.floor(Math.random() * this.width) % this.width;
+            let y = Math.floor(Math.random() * this.height) % this.height;
 
             let energyAmount = Math.floor(Math.random() * 100);
             energyAdded += energyAmount;
 
-            if (energyAdded < this.carryingCapacity) {
+            if (energyAdded > this.carryingCapacity) break;
 
-                //add to env
-                coords = [Math.floor(Math.random() * 100) % this.width, Math.floor(Math.random() * 100) % this.height];
-                let foodSource = new FoodSource(energyAmount, energyAmount, 1, coords);
-                this.addToEnvironment(foodSource);
-
-            }
+            //add to env
+            const coords = [Math.floor(Math.random() * 1000) % this.width, Math.floor(Math.random() * 1000) % this.height];
+            let foodSource = new FoodSource(energyAmount, energyAmount, 1 / Math.ceil(Math.random() * 100), [x,y]);
+            this.addToEnvironment(foodSource);
+                
+            
             //this.map[x][y] = foodSource; <-- we aren't going to assign anything in this map to an object, possibly do a soil simulation eventually
         }
     }
@@ -159,6 +159,7 @@ class Environment extends EventDispatcher {
     //create food and source monitoring 
 
     removeOrganism (organism) {
+
         console.log(`[ENVIRONMENT] Removing organism at ${organism.x}, ${organism.y}`);
 
         this.objects.organisms.delete(organism.id);
@@ -174,6 +175,7 @@ class Environment extends EventDispatcher {
     }
 
     removeFoodSource (foodSource) {
+
         console.log(`[ENVIRONMENT] Removing food source at ${foodSource.x}, ${foodSource.y}`);
 
         this.objects.foodSources.delete(foodSource.id);
@@ -187,7 +189,16 @@ class Environment extends EventDispatcher {
             this.objectMap.delete(`${foodSource.x},${foodSource.y}`);
         }
         
-        
+    }
+
+    removeObject (object) {
+
+        if (object instanceof Organism) {
+            this.removeOrganism(object);
+        } else if (object instanceof FoodSource) {
+            this.removeFoodSource(object);
+        }
+
     }
 
     /**
@@ -214,6 +225,8 @@ class Environment extends EventDispatcher {
         (res) ? res.objects.push(organism.id) : this.objectMap.set(`${newCords[0]},${newCords[1]}`, { objects: [organism.id] });
         
     }
+
+
     
 }
 

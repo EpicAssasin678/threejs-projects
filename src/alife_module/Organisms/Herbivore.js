@@ -21,7 +21,7 @@ class Herbivore extends Organism {
      * ! Make speed at least greater than 4
      */
 
-    constructor (bodyMass, consumptionRate, speed, vision, currentEnergy, size, currentCords, environment) {
+    constructor (bodyMass, consumptionRate, speed, vision, currentEnergy, size, currentCords, environment, traits=undefined) {
         super(bodyMass, currentEnergy, size, speed, currentCords, environment);
         
         this.vision = vision;
@@ -29,10 +29,28 @@ class Herbivore extends Organism {
         this.currentEnergy = currentEnergy;
 
         //identification properties 
-        
+
+        //!BELOW IS JUST TO KEEP SIMULATION RUNNING, NOT RECOMMENDED FOR ACTUAL DIVERSITY 
         this.TRAITS = {
-            VISION_TYPE: Organism.TRAIT_OPTIONS.VISION.RADIAL,
+            HERDING: Organism.TRAIT_OPTIONS.HERDING,
+            VISION: traits?.VISION || Organism.TRAIT_OPTIONS.VISION.RADIAL,
+
+            VISION_RANGE: traits?.VISION_RANGE || Organism.TRAIT_OPTIONS.VISION_RANGE,
+
+            METABOLISM: {
+                RATE: traits?.METABOLISM.RATE || Organism.TRAIT_OPTIONS.METABOLISM.RATE,
+                FAT_ENERGY_DENSITY: traits?.METABOLISM.FAT_ENERGY_DENSITY || Organism.TRAIT_OPTIONS.METABOLISM.FAT_ENERGY_DENSITY,
+            },
+
+            //STOMACH_SIZE: traits?.STOMACH_SIZE || Organism.METABOLISM.STOMACH_SIZE,
             
+
+
+        }
+        
+
+        this.STAGES = {
+
         }
 
         this.FLAGS = {
@@ -41,11 +59,23 @@ class Herbivore extends Organism {
         }
 
         this.memory.remove('prey');
+        
+
 
         console.log(this.FLAGS);
     }
 
+    configureDefaultTraits () {
+
+    }
+
     initializeState (...stateArgs) {
+
+    }
+
+
+
+    initializeStages () {
 
     }
 
@@ -88,10 +118,7 @@ class Herbivore extends Organism {
 
         if (!this.memory.traveledPositions.includes(`${x},${y}`)) {
             //check if we are over memory
-            if (this.memory.traveledPositions.length > 500) {
-                this.memory.traveledPositions.shift();
-            }
-            this.memory.traveledPositions.push(`${x},${y}`);
+
             console.log(`Organism ${this.id} is wandering to ${x}, ${y}`);
             this.move(x, y);
 
@@ -180,7 +207,7 @@ class Herbivore extends Organism {
         let movementLength = Math.sqrt(Math.pow((x - this.x), 2) + Math.pow((y - this.y), 2)); //equation should work
         //see if we move the whole amount, or just part of it
         //todo track diagonals 
-        
+        console.log(`Organism ${this.id} is moving ${movementLength} units to ${x}, ${y}`);
         //check if coords are diagonal to our current position
         this.moveTo(x, y);
         this.remainingMovement -= movementLength;
@@ -190,14 +217,23 @@ class Herbivore extends Organism {
         
         let xDistance = object.x - this.x;
         let yDistance = object.y - this.y;
+        //console.log(`Organism ${this.id} is moving in changes: ${xDistance}, ${yDistance} to object ${object.id} at ${object.x}, ${object.y}`);
+        console.log(
+        `Organism ${this.id} is moving to object: ${object.id}\n`,
+        `Current position: (${this.x}, ${this.y})  Object position: (${object.x}, ${object.y})\n`,
+        `Remaining movement: ${this.remainingMovement}\n`,
+        `Distance: ${xDistance}, ${yDistance}\n`,
+        `Modulo error check: ${xDistance / this.remainingMovement}\n`,
+        `Coords sent to move: ${(xDistance % this.remainingMovement)+ this.x}, ${(yDistance % this.remainingMovement) + this.y} }`
+        );
 
-        this.move((xDistance % this.remainingMovement) + this.x , (yDistance % this.remainingMovement) + this.y );
+        //check if distance is equally divisible by remaining movement
+        //if it is, we can move the whole distance
+        const xChange = ((xDistance / this.remainingMovement) % 1 === 0) ? this.remainingMovement + this.x : (xDistance % this.remainingMovement) + this.x;
+        const yChange = ((yDistance / this.remainingMovement) % 1 === 0) ? this.remainingMovement + this.y : (yDistance % this.remainingMovement) + this.y;
+
+        this.move( xChange, yChange );
     }
-
-    distanceToObject (object) {
-        return Math.sqrt(Math.pow(object.x - this.x, 2) + Math.pow(object.y - this.y, 2));
-    }
-
 
     /**
      * Metabolizes the organism's energy based on its body mass.
@@ -214,9 +250,6 @@ class Herbivore extends Organism {
         const BME = 6.0767 * this.bodyMass + 12.18945 * this.size - 5.677 * this.age + 88.362
         this.currentEnergy -= this.bodyMass * metabolismMod;
 
-        
-
-        
         console.log(`Metabolized ${this.bodyMass * metabolismMod}cal Has ${this.currentEnergy}cal energy left.`);
 
         //check if we are starving
@@ -256,6 +289,26 @@ class Herbivore extends Organism {
     
     die () {
         this.STATE.ALIVE = false;
+    }
+
+    reproduce (mate) {
+        const TRAITS = this.configureOffspringGenetics(mate, this.environment, {
+            entropy: this.environment?.entropy || 1,
+            MUTATION_RATE: this.environment?.mutationRate || this.TRAITS.MUTATION_RATE || 0.1,
+        });
+
+        //create parameters for new organism
+        const bodyMass = Math.floor((Math.random() * 100 ) % (this.bodyMass + mate.bodyMass) / 2) ;
+        const speed = (Math.random() > 0.5) ? this.speed : mate.speed;
+        const vision = (Math.random() > 0.5) ? this.vision : mate.vision;
+        
+        const longerLife = (this.age > mate.age) ? this: mate;
+        const consumptionRate = (Math.random() > 0.5) ? longerLife.consumptionRate + (this.consumptionRate + mate.consumptionRate / 2) * Math.random() :
+            longerLife.consumptionRate - (this.consumptionRate + mate.consumptionRate / 2) * Math.random();
+        
+        const size = (Math.random() > 0.5) ? this.size : mate.size;
+        
+        
     }
 
     
@@ -300,8 +353,10 @@ class Herbivore extends Organism {
                 }
             }
         }
+
         console.log(objects);
         return objects;
+
     }
 
     /**
@@ -310,16 +365,15 @@ class Herbivore extends Organism {
      * Body mass mod for now is only a constant, but will be a trait in the future. Used for cal conversion.
      * TODO once traits implemented, remove bodyMassMod and instead use the instance field bodyMass
      */
-    evaluateState (bodyMassMod) {
+    evaluateState () {
         //check if hungry or starving
         console.log(`Organism ${this.id} is evaluating state`);
 
-        if (this.currentEnergy < (this.bodyMass *  bodyMassMod)) {
+        //checkHunger
+        if (this.currentEnergy < (this.bodyMass *  this.TRAITS.METABOLISM.RATE)) {
             this.STATE.HUNGER = ( this.currentEnergy < 0 ) ? Organism.HUNGER_STATES.STARVING : Organism.HUNGER_STATES.HUNGRY;
-        } else {
-            if (this.currentEnergy > (this.bodyMass * bodyMassMod)) {
-                this.STATE.HUNGER = Organism.HUNGER_STATES.FULL;
-            }
+        } else if (this.currentEnergy > (this.bodyMass * this.TRAITS.METABOLISM.RATE)) {
+            this.STATE.HUNGER = Organism.HUNGER_STATES.FULL;
         }
         //todo check for predators
 
@@ -328,13 +382,72 @@ class Herbivore extends Organism {
     }
 
 
-    //FOR ORIENTING CONTROLS
-    decideAction (calorieConversion=13) {
+    /**
+     * Configures the STATE.ACTION field for the turn 
+     * 
+     * 
+     * @param {Number} calorieConversion 
+     */
+    decideAction () {
         console.log(`Organism ${this.id} is deciding an action`);
+        
         
         //check surroundings for objects 
         let objects = this.detectSurroundings(this.environment);
+        this.evaluateState();
+
+        //configure state for decision making 
+        console.log(this.STATE);
+
+        //feed weights max == .50
+        const feedWeight = this.sumWeights([
+            this.weightCondition(this.STATE.HUNGER === 'HUNGRY', 0.15),
+            this.weightCondition(this.STATE.HUNGER === 'STARVING', 0.25),
+            this.weightCondition(this.STATE.HUNGER === 'FULL', 0),
+
+        ]);
+
+        const evadeWeight = this.sumWeights([
+
+            this.weightCondition(this.memory.predators.length > 0, 0, 0, () => {
+                return this.evaluateThreatLevel(this.memory.predators);
+            }),
+
+        ]);
+
+        const reproduceWeight = this.sumWeights([
+            this.weightCondition(feedWeight === 0, 0.25), 
+            this.weightCondition(this.memory.mates.length > 0, 0.15, 0), //if there are mates, formula for each
+            this.weightCondition(findNearestMate() > 0, .15,0),
+            this.weightCondition(this.memory.intent.length > 0 && this.memory.intent[0] === 'REPRODUCTING', 0.25),
+        ]);
+
+        const wanderWeight = this.sumWeights([
+            this.weightCondition(feedWeight === 0 && evadeWeight === 0 && reproduceWeight === 0, 1, 0),
+        ]);
+
+        //compare weights, sort array, return 0
+        this.STATE.ACTION = [
+            [feedWeight, Organism.ACTION_STATES.FORAGING],
+            [evadeWeight, Organism.ACTION_STATES.EVADING],
+            [reproduceWeight, Organism.ACTION_STATES.REPRODUCING],
+            [wanderWeight, Organism.ACTION_STATES.WANDERING],
+        ].sort( (a, b) => a - b)[0];
+
+
+    }
+
+
+
+    executeAction () {
+        console.log(`Organism ${this.id} is deciding an action`);
+
+        let calorieConversion = 0.1; //!TEMPORARY, ONLY TO KEEP SIM RUNNING FOR DBG 
+
+        //check surroundings for objects 
+        let objects = this.detectSurroundings(this.environment);
         this.evaluateState(calorieConversion);
+
         //configure state for decision making 
         console.log(this.STATE);
 
@@ -344,6 +457,7 @@ class Herbivore extends Organism {
 
             //check if there is a food source nearby
             let foodSources = [];
+
             objects.forEach((object) => {
                 if (this.environment.objects.foodSources.get(object)) {
                     console.log(`Organism ${this.id} found a food source`);
@@ -356,21 +470,37 @@ class Herbivore extends Organism {
 
             });
 
-            //if there is a food source nearby, move to it
-            if (foodSources.length > 0) {
+            //if there is a food source nearby and we haven't found another, move to it
+            if (foodSources.length > 0 ) {
                 //find nearest food source
+
                 let nearestFoodSource = foodSources[0];
-                for (let i = 0; i < foodSources.length; i++) {
-                    if (this.distanceToObject(foodSources[i]) < this.distanceToObject(nearestFoodSource)) {
-                        nearestFoodSource = foodSources[i];
+                if (this.memory.foodSource[0] == null) {
+
+                    for (let i = 0; i < foodSources.length; i++) {
+                        if (this.distanceToObject(foodSources[i]) < this.distanceToObject(nearestFoodSource)) {
+    
+                            nearestFoodSource = foodSources[i];
+                            
+                        }
                     }
+                    this.memory.foodSource.push(nearestFoodSource);
+
+                } else {
+                    nearestFoodSource = this.memory.foodSource[0];
                 }
                 
+                
                 this.moveToObject(nearestFoodSource);
+
                 if (this.distanceToObject(nearestFoodSource) < 1) {
+
                     console.log(`Organism ${this.id} is close enough to feed`);
                     this.feed(nearestFoodSource); //if we are close enough, feed
+                    this.memory.foodSource.pop();
+
                 }
+
             } else {
                 //if there is no food source nearby, wander
                 console.log(`Organism ${this.id} decided to wander`);
@@ -386,7 +516,10 @@ class Herbivore extends Organism {
 
 
         //metabolize energy
-        this.metabolize(calorieConversion);
+        this.metabolize(this.TRAITS.METABOLISM.RATE);
+
+        console.log(`Organism ${this.id} coords are ${this.x}, ${this.y}`);
+
     }
 
 

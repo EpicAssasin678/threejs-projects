@@ -22,6 +22,13 @@ class Simulation extends EventDispatcher {
             organisms: [],
             foodSources: []
         };
+
+        this.config = {
+            fdecay: true,
+
+            
+
+        }
     }
 
     /**
@@ -42,7 +49,7 @@ class Simulation extends EventDispatcher {
             if (organism.STATE.ALIVE) {
                 //refill movement 
                 organism.refillMovement();
-                organism.decideAction();
+                organism.executeAction();
             } else {
                 this.died.organisms.push(organism.id);
 
@@ -54,7 +61,7 @@ class Simulation extends EventDispatcher {
         //update every food source 
         foodsources.forEach(foodsource => {
 
-            if ( foodsource.currentEnergy - foodsource.decayRate >= 0) foodsource.decay();
+            if ( this.config.fdecay && foodsource.currentEnergy - foodsource.decayRate >= 0 ) foodsource.decay();
             if ( foodsource.isDepleted() ) {
                 
                 this.died.foodSources.push(foodsource.id);
@@ -66,6 +73,7 @@ class Simulation extends EventDispatcher {
 
         
     }
+
 
     removeDead () {
 
@@ -85,6 +93,8 @@ class Simulation extends EventDispatcher {
 
 
     }
+
+
 }
 
 export default Simulation;
